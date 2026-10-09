@@ -1,0 +1,17 @@
+{
+  "ingresos": 28450,
+  "ingresosCambio": 12.8,
+  "clientesActivos": 1248,
+  "clientesCambio": 8.2,
+  "recompensas": 386,
+  "recompensasCambio": 16.4,
+  "visitas": 3420,
+  "visitasCambio": 6.7,
+  "ventasMensuales": [18, 25, 22, 33, 29, 42, 37, 50, 44, 61, 54, 72],
+  "categorias": [
+    {"nombre": "Cafeterías", "valor": 42},
+    {"nombre": "Restaurantes", "valor": 28},
+    {"nombre": "Reposterías", "valor": 17},
+    {"nombre": "Otros", "valor": 13}
+  ]
+}

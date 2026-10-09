@@ -1,0 +1,7 @@
+[
+  {"id":1,"nombre":"Lucía Martínez","iniciales":"LM","negocio":"Café de la Plaza","fecha":"14 oct 2025","calificacion":5,"comentario":"La tarjeta es muy fácil de usar. Siempre veo cuántos cafés me faltan y ya canjeé uno gratis sin complicaciones.","sentimiento":"Positiva"},
+  {"id":2,"nombre":"Mateo Fernández","iniciales":"MF","negocio":"Dulce Encuentro","fecha":"12 oct 2025","calificacion":4,"comentario":"Me gusta recibir cashback en cada compra. Sería útil poder ver un resumen de mis recompensas del mes.","sentimiento":"Positiva"},
+  {"id":3,"nombre":"Valentina Rojas","iniciales":"VR","negocio":"Barbería Norte","fecha":"10 oct 2025","calificacion":3,"comentario":"La idea funciona bien, aunque al principio no entendía cuándo se registraba mi visita. El equipo me explicó cómo hacerlo.","sentimiento":"Neutral"},
+  {"id":4,"nombre":"Camila Torres","iniciales":"CT","negocio":"La Mesa Alegre","fecha":"8 oct 2025","calificacion":5,"comentario":"El programa es claro y el personal registra mis puntos rápidamente. Me anima a volver con mis amigas.","sentimiento":"Positiva"},
+  {"id":5,"nombre":"Andrés Vega","iniciales":"AV","negocio":"Barbería Norte","fecha":"5 oct 2025","calificacion":2,"comentario":"Mi visita tardó en aparecer en la tarjeta y tuve que consultar en el local. Sería mejor recibir una confirmación inmediata.","sentimiento":"Por mejorar"}
+]

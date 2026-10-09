@@ -1,41 +1,54 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <link href="./output.css" rel="stylesheet">
-</head href="./output.css" rel="stylesheet">>
-<body class="flex min-h-screen bg-[#f5e6c8]">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#603f2a" />
+    <meta name="description" content="Fidegresa, programa de fidelización para comercios locales." />
+    <title>Fidegresa | Fidelización de clientes</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" id="sidebar">
+        <a class="brand" href="#metricas" data-page="metricas" aria-label="Fidegresa, inicio">
+          <span class="brand-mark">F</span>
+          <span class="brand-name">Fidegresa<small>FIDELIZA CON CARIÑO</small></span>
+        </a>
+        <span class="nav-label">MENÚ PRINCIPAL</span>
+        <nav class="main-nav" aria-label="Navegación principal">
+          <a class="nav-link active" href="#metricas" data-page="metricas"><span class="nav-icon">▥</span>Métricas</a>
+          <a class="nav-link" href="#tarjetas" data-page="tarjetas"><span class="nav-icon">▤</span>Tarjetas</a>
+          <a class="nav-link" href="#clientes" data-page="clientes"><span class="nav-icon">♙</span>Clientes</a>
+          <a class="nav-link" href="#ubicaciones" data-page="ubicaciones"><span class="nav-icon">⌂</span>Ubicaciones</a>
+          <a class="nav-link" href="#resenas" data-page="resenas"><span class="nav-icon">☆</span>Reseñas</a>
+          <a class="nav-link" href="#configuracion" data-page="configuracion"><span class="nav-icon">⚙</span>Configuración</a>
+          <a class="nav-link" href="#geolocalizacion" data-page="geolocalizacion"><span class="nav-icon">◎</span>Geolocalización</a>
+        </nav>
+        <div class="sidebar-bottom">
+          <div class="help-card"><span class="help-spark">✳</span><strong>Crece con tus clientes</strong><p>Pequeños detalles crean grandes lealtades.</p></div>
+          <button class="profile-mini" data-action="profile">
+            <span class="avatar">MG</span><span><strong>María González</strong><small>Administradora</small></span><span class="profile-dots">···</span>
+          </button>
+        </div>
+      </aside>
 
-  <!-- Panel izquierdo -->
-  <aside class="w-64 min-h-screen bg-[#6b4423] p-6 text-[#f5e6c8]">
-    <h1 class="mb-8 text-3xl font-bold">Fidegresa</h1>
-    <nav class="flex flex-1 flex-col gap-1 font-semibold">
-      <a href="#" class="flex items-center gap-3 rounded-lg border-l-4 border-[#f5e6c8] bg-[#8a5a32] px-4 py-3">
-        <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>
-        Métricas
-      </a>
-      <a href="#" class="flex items-center gap-3 rounded-lg px-4 py-3 hover:bg-[#8a5a32]">
-        <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
-        Tarjetas
-      </a>
-      <a href="#" class="flex items-center gap-3 rounded-lg px-4 py-3 hover:bg-[#8a5a32]">
-        <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M17 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6"/></svg>
-        Clientes
-      </a>
-      <a href="#" class="flex items-center gap-3 rounded-lg px-4 py-3 hover:bg-[#8a5a32]">
-        <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg>
-        Ubicaciones
-      </a>
-      <a href="#" class="flex items-center gap-3 rounded-lg px-4 py-3 hover:bg-[#8a5a32]">
-        <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3l-5.5 2.9 1-6.2L3 9.6l6.2-.9z"/></svg>
-        Reseñas
-      </a>
-      <a href="#" class="flex items-center gap-3 rounded-lg px-4 py-3 hover:bg-[#8a5a32]">
-        <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg>
-        Configuración
-      </a>
-      <a href="#" class="flex items-center gap-3 rounded-lg px-4 py-3 hover:bg-[#8a5a32]">
-        <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>
-        Geolocalización
-      </a>
-    </nav>
+      <main class="main-area">
+        <header class="topbar">
+          <button class="icon-button mobile-menu" data-action="menu" aria-label="Abrir menú">☰</button>
+          <div class="breadcrumb"><span>Panel</span><span class="crumb-divider">/</span><strong id="breadcrumb-current">Métricas</strong></div>
+          <div class="topbar-actions">
+            <span class="today-label" id="today-label"></span>
+            <button class="icon-button notification-button" aria-label="Notificaciones">♧<i></i></button>
+            <button class="top-avatar" data-action="profile" aria-label="Abrir perfil">MG</button>
+          </div>
+        </header>
+        <section class="page-content" id="page-content" aria-live="polite"></section>
+        <footer class="footer"><span>© 2025 Fidegresa</span><span>Hecho para los negocios de tu comunidad <b>♥</b></span></footer>
+      </main>
+    </div>
+    <dialog class="modal" id="app-modal"><form method="dialog" class="modal-card" id="modal-form"></form></dialog>
+    <div class="toast-region" id="toast-region" aria-live="polite"></div>
+  </body>
+</html>
