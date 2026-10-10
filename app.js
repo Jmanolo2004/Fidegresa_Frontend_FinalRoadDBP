@@ -74,7 +74,7 @@ function initials(name = "") {
   return name.split(/\s+/).filter(Boolean).slice(0,2).map(word => word[0]).join("").toUpperCase();
 }
 function money(value) {
-  return new Intl.NumberFormat("es-MX",{style:"currency",currency:"MXN",maximumFractionDigits:0}).format(value);
+  return new Intl.NumberFormat("es-PE",{style:"currency",currency:"PEN",maximumFractionDigits:0}).format(value);
 }
 function saveData() {
   try {
@@ -111,7 +111,7 @@ function chartMarkup() {
   const points = values.map((value,index) => `${left + index * plotWidth / 11},${top + plotHeight - (value / 80) * plotHeight}`).join(" ");
   const areaPath = `M ${left},${top + plotHeight} L ${points.replaceAll(" ", " L ")} L ${left + plotWidth},${top + plotHeight} Z`;
   const labels = ["Nov","Dic","Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct"];
-  return `<div class="chart-wrap"><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${selectedMetric === "ventas" ? "Gráfico de ventas" : "Gráfico de visitas"} por mes" preserveAspectRatio="none"><defs><linearGradient id="chart-fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ad8059" stop-opacity=".25"/><stop offset="1" stop-color="#ad8059" stop-opacity=".01"/></linearGradient></defs>${[0,1,2,3].map(index => `<line class="chart-grid" x1="${left}" y1="${top + index * plotHeight / 3}" x2="${left + plotWidth}" y2="${top + index * plotHeight / 3}"/><text class="chart-label" x="0" y="${top + index * plotHeight / 3 + 3}">${selectedMetric === "ventas" ? `${80 - index * 25}k` : 800 - index * 250}</text>`).join("")}<path class="chart-area" d="${areaPath}"/><polyline class="chart-line" points="${points}"/>${values.map((value,index) => `<circle class="chart-dot" cx="${left + index * plotWidth / 11}" cy="${top + plotHeight - (value / 80) * plotHeight}" r="3"/>`).join("")}${labels.map((label,index) => `<text class="chart-label" text-anchor="middle" x="${left + index * plotWidth / 11}" y="${height - 5}">${label}</text>`).join("")}</svg><span class="chart-tooltip">Oct · ${selectedMetric === "ventas" ? "$72,000" : "684 visitas"}</span></div>`;
+  return `<div class="chart-wrap"><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${selectedMetric === "ventas" ? "Gráfico de ventas" : "Gráfico de visitas"} por mes" preserveAspectRatio="none"><defs><linearGradient id="chart-fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ad8059" stop-opacity=".25"/><stop offset="1" stop-color="#ad8059" stop-opacity=".01"/></linearGradient></defs>${[0,1,2,3].map(index => `<line class="chart-grid" x1="${left}" y1="${top + index * plotHeight / 3}" x2="${left + plotWidth}" y2="${top + index * plotHeight / 3}"/><text class="chart-label" x="0" y="${top + index * plotHeight / 3 + 3}">${selectedMetric === "ventas" ? `${80 - index * 25}k` : 800 - index * 250}</text>`).join("")}<path class="chart-area" d="${areaPath}"/><polyline class="chart-line" points="${points}"/>${values.map((value,index) => `<circle class="chart-dot" cx="${left + index * plotWidth / 11}" cy="${top + plotHeight - (value / 80) * plotHeight}" r="3"/>`).join("")}${labels.map((label,index) => `<text class="chart-label" text-anchor="middle" x="${left + index * plotWidth / 11}" y="${height - 5}">${label}</text>`).join("")}</svg><span class="chart-tooltip">Oct · ${selectedMetric === "ventas" ? "S/ 72,000" : "684 visitas"}</span></div>`;
 }
 function render() {
   document.querySelector("#breadcrumb-current").textContent=titleFor(currentPage);
