@@ -12,4 +12,6 @@ Abre `http://localhost:8000` en el navegador. Si abres `index.html` directamente
 
 Los datos de inicio están en `Metricas.json`, `Clientes.json`, `Tarjetas.json`, `ubicaciones.json`, `Reseñas.json`, `Geolocalizacion.json` y `Configuración.json`. Los cambios realizados desde el panel se guardan en el almacenamiento local del navegador.
 
+Las funciones de cada pantalla están separadas en archivos dentro de `pages/`.
+
 La vista de geolocalización es esquemática y utiliza clientes de demostración; no rastrea la ubicación real de las personas.

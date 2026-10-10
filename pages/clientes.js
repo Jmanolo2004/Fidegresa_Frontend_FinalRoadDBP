@@ -1,0 +1,10 @@
+window.fidegresaPageRenderers ??= {};
+window.fidegresaPageRenderers.clientes = ({data, heading, statCard, customerTable, escapeHtml, searchTerm, clientFilter}) => {
+  const results = data.clientes.filter(person => {
+    const matchesTerm = `${person.nombre} ${person.correo} ${person.tarjeta}`.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesTerm && (clientFilter === "Todos" || person.estado === clientFilter);
+  });
+  return `${heading("Tus clientes","Conoce a las personas que hacen crecer a tus negocios",`<button class="secondary-button" data-action="export-clients">↓ &nbsp; Exportar lista</button>`)}
+    <div class="stats-grid">${statCard("Clientes registrados",data.clientes.length,"En todas tus ubicaciones","♙")}${statCard("Tarjetas activas",data.clientes.filter(person=>person.estado==="Activa").length,"Clientes con actividad vigente","▤")}${statCard("Visitas totales",data.clientes.reduce((total,person)=>total+person.visitas,0),"Registradas por el programa","⌂")}${statCard("Visitas por cliente",(data.clientes.reduce((total,person)=>total+person.visitas,0)/Math.max(1,data.clientes.length)).toFixed(1),"Promedio de visitas","↗")}</div>
+    <article class="panel activity-panel"><div class="panel-heading"><div><h2>Directorio de clientes</h2><p>Consulta sus tarjetas y actividad</p></div></div><div class="section-toolbar"><label class="search-wrap"><span>⌕</span><input class="search-input" id="client-search" type="search" placeholder="Buscar nombre, correo o tarjeta" value="${escapeHtml(searchTerm)}"></label><select class="filter-select" id="client-filter" aria-label="Filtrar por estado"><option${clientFilter==="Todos"?" selected":""}>Todos</option><option${clientFilter==="Activa"?" selected":""}>Activa</option><option${clientFilter==="Inactiva"?" selected":""}>Inactiva</option></select></div>${customerTable(results)}<div class="table-meta"><span>Mostrando ${results.length} de ${data.clientes.length} clientes</span><span>Datos actualizados hoy</span></div></article>`;
+};
