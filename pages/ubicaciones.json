@@ -1,7 +1,0 @@
-[
-  {"id":1,"nombre":"Café de la Plaza","categoria":"Cafetería","direccion":"Av. de los Cafetales 245, Centro","horario":"Lun – Dom · 7:00 – 20:00","clientes":324,"activa":true},
-  {"id":2,"nombre":"Dulce Encuentro","categoria":"Repostería","direccion":"Calle Magnolia 82, San Miguel","horario":"Mar – Dom · 9:00 – 19:00","clientes":216,"activa":true},
-  {"id":3,"nombre":"Barbería Norte","categoria":"Barbería","direccion":"Blvd. de la Estación 510, Norte","horario":"Lun – Sáb · 10:00 – 21:00","clientes":148,"activa":true},
-  {"id":4,"nombre":"La Mesa Alegre","categoria":"Restaurante","direccion":"Paseo del Bosque 34, Jardines","horario":"Lun – Dom · 13:00 – 23:00","clientes":179,"activa":false},
-  {"id":5,"nombre":"Confitería Nube","categoria":"Confitería","direccion":"Calle de las Flores 117, Centro","horario":"Lun – Sáb · 8:30 – 18:30","clientes":92,"activa":true}
-]

@@ -1,6 +1,0 @@
-[
-  {"id":1,"nombre":"Un café con cariño","tipo":"Estampillas","negocio":"Café de la Plaza","descripcion":"Disfruta tu décimo café por cuenta de la casa.","estampillas":10,"clientes":324,"estado":"Activa"},
-  {"id":2,"nombre":"Dulce recompensa","tipo":"Cashback","negocio":"Dulce Encuentro","descripcion":"Acumula un 5% de vuelta en cada compra.","porcentaje":5,"clientes":216,"estado":"Activa"},
-  {"id":3,"nombre":"Cortes que premian","tipo":"Estampillas","negocio":"Barbería Norte","descripcion":"Tu sexto corte tiene un 50% de descuento.","estampillas":6,"clientes":148,"estado":"Activa"},
-  {"id":4,"nombre":"La Mesa te premia","tipo":"Cashback","negocio":"La Mesa Alegre","descripcion":"Recibe un 3% de cashback en tus visitas.","porcentaje":3,"clientes":179,"estado":"Activa"}
-]
