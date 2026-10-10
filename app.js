@@ -45,6 +45,9 @@ const seedData = {
   configuracion: {marca:"Fidegresa",perfilNombre:"María González",perfilCorreo:"maria@fidegresa.com",tema:"claro"}
 };
 
+// Archivos JSON opcionales. Si existen en la carpeta indicada, reemplazan a los
+// datos de demostración; si no existen, el panel usa seedData sin mostrar error.
+const jsonFolder = "pages";
 const files = {
   metricas:"Metricas.json",
   clientes:"Clientes.json",
@@ -54,9 +57,21 @@ const files = {
   geolocalizacion:"Geolocalizacion.json",
   configuracion:"Configuración.json"
 };
+const pageTitles = {
+  metricas:"Métricas",
+  tarjetas:"Tarjetas",
+  clientes:"Clientes",
+  ubicaciones:"Ubicaciones",
+  resenas:"Reseñas",
+  configuracion:"Configuración",
+  geolocalizacion:"Geolocalización"
+};
+const defaultPage = "metricas";
+const locale = "es-PE";
+const currency = "PEN";
 const storeKey = "fidegresa-dashboard-v1";
 let data = structuredClone(seedData);
-let currentPage = "metricas";
+let currentPage = defaultPage;
 let searchTerm = "";
 let clientFilter = "Todos";
 let cardFilter = "Todas";
@@ -74,7 +89,14 @@ function initials(name = "") {
   return name.split(/\s+/).filter(Boolean).slice(0,2).map(word => word[0]).join("").toUpperCase();
 }
 function money(value) {
-  return new Intl.NumberFormat("es-PE",{style:"currency",currency:"PEN",maximumFractionDigits:0}).format(value);
+  return new Intl.NumberFormat(locale,{style:"currency",currency,maximumFractionDigits:0}).format(value);
+}
+function isValidPage(page) {
+  return Object.hasOwn(pageTitles, page);
+}
+function pageFromHash() {
+  const page = location.hash.slice(1);
+  return isValidPage(page) ? page : defaultPage;
 }
 function saveData() {
   try {
@@ -91,7 +113,7 @@ function showToast(message, isError = false) {
   toastTimer = setTimeout(() => region.replaceChildren(), 3200);
 }
 function titleFor(page) {
-  return ({metricas:"Métricas",tarjetas:"Tarjetas",clientes:"Clientes",ubicaciones:"Ubicaciones",resenas:"Reseñas",configuracion:"Configuración",geolocalizacion:"Geolocalización"})[page] || "Métricas";
+  return pageTitles[page] || pageTitles[defaultPage];
 }
 function heading(title, subtitle, action = "") {
   return `<div class="page-heading"><div><p class="eyebrow">Fidegresa · Tu comunidad</p><h1>${title}</h1><p>${subtitle}</p></div>${action}</div>`;
@@ -111,12 +133,13 @@ function chartMarkup() {
   const points = values.map((value,index) => `${left + index * plotWidth / 11},${top + plotHeight - (value / 80) * plotHeight}`).join(" ");
   const areaPath = `M ${left},${top + plotHeight} L ${points.replaceAll(" ", " L ")} L ${left + plotWidth},${top + plotHeight} Z`;
   const labels = ["Nov","Dic","Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct"];
-  return `<div class="chart-wrap"><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${selectedMetric === "ventas" ? "Gráfico de ventas" : "Gráfico de visitas"} por mes" preserveAspectRatio="none"><defs><linearGradient id="chart-fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ad8059" stop-opacity=".25"/><stop offset="1" stop-color="#ad8059" stop-opacity=".01"/></linearGradient></defs>${[0,1,2,3].map(index => `<line class="chart-grid" x1="${left}" y1="${top + index * plotHeight / 3}" x2="${left + plotWidth}" y2="${top + index * plotHeight / 3}"/><text class="chart-label" x="0" y="${top + index * plotHeight / 3 + 3}">${selectedMetric === "ventas" ? `${80 - index * 25}k` : 800 - index * 250}</text>`).join("")}<path class="chart-area" d="${areaPath}"/><polyline class="chart-line" points="${points}"/>${values.map((value,index) => `<circle class="chart-dot" cx="${left + index * plotWidth / 11}" cy="${top + plotHeight - (value / 80) * plotHeight}" r="3"/>`).join("")}${labels.map((label,index) => `<text class="chart-label" text-anchor="middle" x="${left + index * plotWidth / 11}" y="${height - 5}">${label}</text>`).join("")}</svg><span class="chart-tooltip">Oct · ${selectedMetric === "ventas" ? "S/ 72,000" : "684 visitas"}</span></div>`;
+  // El último mes se muestra en soles a partir del dato real (los valores están en miles).
+  const lastSales = money(data.metricas.ventasMensuales.at(-1) * 1000);
+  return `<div class="chart-wrap"><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${selectedMetric === "ventas" ? "Gráfico de ventas" : "Gráfico de visitas"} por mes" preserveAspectRatio="none"><defs><linearGradient id="chart-fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ad8059" stop-opacity=".25"/><stop offset="1" stop-color="#ad8059" stop-opacity=".01"/></linearGradient></defs>${[0,1,2,3].map(index => `<line class="chart-grid" x1="${left}" y1="${top + index * plotHeight / 3}" x2="${left + plotWidth}" y2="${top + index * plotHeight / 3}"/><text class="chart-label" x="0" y="${top + index * plotHeight / 3 + 3}">${selectedMetric === "ventas" ? `${80 - index * 25}k` : 800 - index * 250}</text>`).join("")}<path class="chart-area" d="${areaPath}"/><polyline class="chart-line" points="${points}"/>${values.map((value,index) => `<circle class="chart-dot" cx="${left + index * plotWidth / 11}" cy="${top + plotHeight - (value / 80) * plotHeight}" r="3"/>`).join("")}${labels.map((label,index) => `<text class="chart-label" text-anchor="middle" x="${left + index * plotWidth / 11}" y="${height - 5}">${label}</text>`).join("")}</svg><span class="chart-tooltip">Oct · ${selectedMetric === "ventas" ? lastSales : "684 visitas"}</span></div>`;
 }
 function render() {
   document.querySelector("#breadcrumb-current").textContent=titleFor(currentPage);
-  document.querySelector(".brand-name").innerHTML=`${escapeHtml(data.configuracion.marca)}<small>FIDELIZA CON CARIÑO</small>`;
-  document.querySelector(".brand-mark").textContent=initials(data.configuracion.marca).slice(0,1)||"F";
+  document.querySelector(".brand-name").innerHTML=`${escapeHtml(data.configuracion.marca)}<small>FIDELIZA Y REGRESA</small>`;
   document.querySelector(".top-avatar").textContent=initials(data.configuracion.perfilNombre);
   document.querySelector(".profile-mini .avatar").textContent=initials(data.configuracion.perfilNombre);
   document.querySelector(".profile-mini span:nth-child(2)").innerHTML=`<strong>${escapeHtml(data.configuracion.perfilNombre)}</strong><small>Administradora</small>`;
@@ -128,7 +151,7 @@ function render() {
   document.body.classList.toggle("dark-theme",data.configuracion.tema==="oscuro");
 }
 function goTo(page) {
-  if (!titleFor(page)) return;
+  if (!isValidPage(page)) return;
   currentPage=page;
   searchTerm="";
   if (location.hash!==`#${page}`) history.pushState(null,"",`#${page}`);
@@ -188,22 +211,25 @@ function loadSavedData() {
     showToast("No fue posible leer los datos guardados.",true);
   }
 }
+// Carga un JSON opcional. Devuelve null si el archivo no existe o está vacío,
+// para que el panel siga usando los datos de demostración.
+async function fetchOptionalJson(file) {
+  const response=await fetch(`./${jsonFolder}/${encodeURIComponent(file)}`);
+  if(response.status===404) return null;
+  if(!response.ok) throw new Error(`${file}: HTTP ${response.status}`);
+  const text=await response.text();
+  return text.trim()?JSON.parse(text):null;
+}
 async function loadJsonSeedData() {
-  if(location.protocol==="file:") {
-    showToast("Vista local de demostración. Para cargar los JSON, abre el proyecto en un servidor local.");
-    return;
-  }
+  // Al abrir index.html directamente (file://) el navegador no permite fetch.
+  if(location.protocol==="file:") return;
+  // Si ya hay cambios guardados en este navegador, esos tienen prioridad.
+  if(localStorage.getItem(storeKey)) return;
   try {
-    const entries=await Promise.all(Object.entries(files).map(async([key,file])=>{
-      const response=await fetch(`./${encodeURIComponent(file)}`);
-      if(!response.ok) throw new Error(`${file}: HTTP ${response.status}`);
-      const text=await response.text();
-      return [key,text.trim()?JSON.parse(text):null];
-    }));
-    const saved=localStorage.getItem(storeKey);
-    for(const [key,value] of entries) if(value && !saved) data[key]=value;
-    if(!saved) saveData();
-    render();
+    const entries=await Promise.all(Object.entries(files).map(async([key,file])=>[key,await fetchOptionalJson(file)]));
+    let loaded=false;
+    for(const [key,value] of entries) if(value){data[key]=value;loaded=true;}
+    if(loaded){saveData();render();}
   } catch(error) {
     console.error("No se pudieron cargar los datos JSON.",error);
     showToast("No se pudieron cargar los archivos JSON. Revisa la consola del navegador.",true);
@@ -252,10 +278,10 @@ document.addEventListener("change",event=>{
   if(event.target.id==="metric-select"){selectedMetric=event.target.value;render();}
   if(event.target.id==="geo-location"){data.geolocalizacion.ubicacionId=Number(event.target.value);saveData();render();}
 });
-window.addEventListener("popstate",()=>{currentPage=location.hash.slice(1)||"metricas";render();});
-document.querySelector("#today-label").textContent=new Intl.DateTimeFormat("es-MX",{weekday:"short",day:"numeric",month:"short",year:"numeric"}).format(new Date());
+window.addEventListener("popstate",()=>{currentPage=pageFromHash();render();});
+document.querySelector("#today-label").textContent=new Intl.DateTimeFormat(locale,{weekday:"short",day:"numeric",month:"short",year:"numeric"}).format(new Date());
 document.querySelector(".footer span").textContent=`© ${new Date().getFullYear()} Fidegresa`;
 loadSavedData();
-currentPage=location.hash.slice(1)||"metricas";
+currentPage=pageFromHash();
 render();
 loadJsonSeedData();
