@@ -139,7 +139,6 @@ function chartMarkup() {
 }
 function render() {
   document.querySelector("#breadcrumb-current").textContent=titleFor(currentPage);
-  document.querySelector(".brand-name").innerHTML=`${escapeHtml(data.configuracion.marca)}<small>FIDELIZA Y REGRESA</small>`;
   document.querySelector(".top-avatar").textContent=initials(data.configuracion.perfilNombre);
   document.querySelector(".profile-mini .avatar").textContent=initials(data.configuracion.perfilNombre);
   document.querySelector(".profile-mini span:nth-child(2)").innerHTML=`<strong>${escapeHtml(data.configuracion.perfilNombre)}</strong><small>Administradora</small>`;
