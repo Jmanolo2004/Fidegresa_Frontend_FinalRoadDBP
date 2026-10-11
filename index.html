@@ -22,39 +22,41 @@
   <body>
     <div class="app-shell">
       <aside class="sidebar" id="sidebar">
-        <a class="brand" href="#metricas" data-page="metricas" aria-label="Fidegresa, inicio" style="width:100%;justify-content:center">
-          <img class="brand-logo" src="./assets/fidegresa-logo.png" alt="Fidegresa, Fideliza y regresa" style="display:block;width:100%;height:auto;object-fit:contain" />
+        <a class="brand" href="#metricas" data-page="metricas" aria-label="Fidegresa, inicio">
+          <img class="brand-logo" src="./assets/favicon.svg" alt="" />
+          <span class="brand-copy"><strong>Fidegresa</strong><small>Fideliza y regresa</small></span>
         </a>
-        <span class="nav-label">MENÚ PRINCIPAL</span>
         <nav class="main-nav" aria-label="Navegación principal">
-          <a class="nav-link active" href="#metricas" data-page="metricas"><span class="nav-icon">▥</span>Métricas</a>
-          <a class="nav-link" href="#tarjetas" data-page="tarjetas"><span class="nav-icon">▤</span>Tarjetas</a>
-          <a class="nav-link" href="#clientes" data-page="clientes"><span class="nav-icon">♙</span>Clientes</a>
-          <a class="nav-link" href="#ubicaciones" data-page="ubicaciones"><span class="nav-icon">⌂</span>Ubicaciones</a>
-          <a class="nav-link" href="#resenas" data-page="resenas"><span class="nav-icon">☆</span>Reseñas</a>
-          <a class="nav-link" href="#geolocalizacion" data-page="geolocalizacion"><span class="nav-icon">◎</span>Geolocalización</a>
-          <a class="nav-link" href="#configuracion" data-page="configuracion"><span class="nav-icon">⚙</span>Configuración</a>
+          <span class="nav-label">Tu negocio</span>
+          <a class="nav-link active" href="#metricas" data-page="metricas"><span class="sidebar-icon" data-icon="chart"></span>Métricas</a>
+          <a class="nav-link" href="#clientes" data-page="clientes"><span class="sidebar-icon" data-icon="users"></span>Clientes</a>
+          <a class="nav-link" href="#resenas" data-page="resenas"><span class="sidebar-icon" data-icon="star"></span>Reseñas</a>
+          <span class="nav-label">Tu programa</span>
+          <a class="nav-link" href="#tarjetas" data-page="tarjetas"><span class="sidebar-icon" data-icon="card"></span>Tarjetas</a>
+          <a class="nav-link" href="#ubicaciones" data-page="ubicaciones"><span class="sidebar-icon" data-icon="pin"></span>Ubicaciones</a>
+          <a class="nav-link" href="#geolocalizacion" data-page="geolocalizacion"><span class="sidebar-icon" data-icon="target"></span>Geolocalización</a>
+          <span class="nav-label">Cuenta</span>
+          <a class="nav-link" href="#configuracion" data-page="configuracion"><span class="sidebar-icon" data-icon="settings"></span>Configuración</a>
         </nav>
         <div class="sidebar-bottom">
-          <div class="help-card"><span class="help-spark">✳</span><strong>Crece con tus clientes</strong><p>Pequeños detalles crean grandes lealtades.</p></div>
           <button class="profile-mini" data-action="profile">
-            <span class="avatar">MG</span><span><strong>María González</strong><small>Administradora</small></span><span class="profile-dots">···</span>
+            <span class="avatar">MG</span><span><strong>María González</strong><small>Administradora</small></span><span class="profile-dots" data-icon="settings"></span>
           </button>
         </div>
       </aside>
 
       <main class="main-area">
         <header class="topbar">
-          <button class="icon-button mobile-menu" data-action="menu" aria-label="Abrir menú">☰</button>
+          <button class="icon-button mobile-menu" data-action="menu" aria-label="Abrir menú"><span data-icon="menu"></span></button>
           <div class="breadcrumb"><span>Panel</span><span class="crumb-divider">/</span><strong id="breadcrumb-current">Métricas</strong></div>
           <div class="topbar-actions">
             <span class="today-label" id="today-label"></span>
-            <button class="icon-button notification-button" aria-label="Notificaciones">♧<i></i></button>
+            <button class="icon-button notification-button" data-action="notifications" aria-label="Notificaciones"><span data-icon="bell"></span><i></i></button>
             <button class="top-avatar" data-action="profile" aria-label="Abrir perfil">MG</button>
           </div>
         </header>
         <section class="page-content" id="page-content" aria-live="polite"></section>
-        <footer class="footer"><span>© 2025 Fidegresa</span><span>Hecho para los negocios de tu comunidad <b>♥</b></span></footer>
+        <footer class="footer"><span>© 2025 Fidegresa</span><span>Hecho para los negocios de tu comunidad <b></b></span></footer>
       </main>
     </div>
     <dialog class="modal" id="app-modal"><form method="dialog" class="modal-card" id="modal-form"></form></dialog>

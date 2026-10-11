@@ -45,18 +45,6 @@ const seedData = {
   configuracion: {marca:"Fidegresa",perfilNombre:"María González",perfilCorreo:"maria@fidegresa.com",tema:"claro"}
 };
 
-// Archivos JSON opcionales. Si existen en la carpeta indicada, reemplazan a los
-// datos de demostración; si no existen, el panel usa seedData sin mostrar error.
-const jsonFolder = "pages";
-const files = {
-  metricas:"Metricas.json",
-  clientes:"Clientes.json",
-  tarjetas:"Tarjetas.json",
-  ubicaciones:"ubicaciones.json",
-  resenas:"Reseñas.json",
-  geolocalizacion:"Geolocalizacion.json",
-  configuracion:"Configuración.json"
-};
 const pageTitles = {
   metricas:"Métricas",
   tarjetas:"Tarjetas",
@@ -75,12 +63,28 @@ let currentPage = defaultPage;
 let searchTerm = "";
 let clientFilter = "Todos";
 let cardFilter = "Todas";
+let reviewFilter = "Todas";
 let selectedMetric = "ventas";
 let toastTimer;
 
 const pageContent = document.querySelector("#page-content");
 const modal = document.querySelector("#app-modal");
 const modalForm = document.querySelector("#modal-form");
+const iconPaths = {
+  chart:"<path d='M3 3v18h18'/><path d='m19 9-5 5-4-4-5 5'/>",
+  users:"<path d='M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/><circle cx='10' cy='7' r='4'/><path d='M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75'/>",
+  star:"<path d='m12 3 2.75 5.57 6.15.89-4.45 4.34 1.05 6.13L12 17.04l-5.5 2.89 1.05-6.13L3.1 9.46l6.15-.89L12 3Z'/>",
+  card:"<rect x='3' y='5' width='18' height='14' rx='2'/><path d='M3 10h18M7 15h3'/>",
+  pin:"<path d='M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z'/><circle cx='12' cy='10' r='2.5'/>",
+  target:"<circle cx='12' cy='12' r='9'/><circle cx='12' cy='12' r='5'/><circle cx='12' cy='12' r='1'/>",
+  settings:"<circle cx='12' cy='12' r='3'/><path d='m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.6a8 8 0 0 1-1.7 1l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.7-1l-1.7.6-1.4-2.4 1.4-1.1a8 8 0 0 1 0-2l-1.4-1.1 1.4-2.4 1.7.6a8 8 0 0 1 1.7-1l.3-1.8h2.8l.3 1.8a8 8 0 0 1 1.7 1l1.7-.6 1.4 2.4-1.4 1.1a8 8 0 0 1-.1 2Z'/>",
+  bell:"<path d='M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4'/>",
+  visits:"<rect x='4' y='5' width='16' height='16' rx='2'/><path d='M8 3v4m8-4v4M4 10h16m-9 4h4'/>",
+  reward:"<path d='M12 8v13m0-13H7.5a2.5 2.5 0 1 1 2.5-2.5V8Zm0 0h4.5a2.5 2.5 0 1 0-2.5-2.5V8ZM4 12h16v9H4zM3 8h18v4H3z'/>",
+  arrow:"<path d='M7 17 17 7M7 7h10v10'/>",
+  close:"<path d='m18 6-12 12M6 6l12 12'/>",
+  menu:"<path d='M4 6h16M4 12h16M4 18h16'/>"
+};
 
 function escapeHtml(value = "") {
   return String(value).replace(/[&<>"']/g, character => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[character]));
@@ -115,27 +119,58 @@ function showToast(message, isError = false) {
 function titleFor(page) {
   return pageTitles[page] || pageTitles[defaultPage];
 }
-function heading(title, subtitle, action = "") {
-  return `<div class="page-heading"><div><p class="eyebrow">Fidegresa · Tu comunidad</p><h1>${title}</h1><p>${subtitle}</p></div>${action}</div>`;
+function icon(name, size = 18) {
+  const path = iconPaths[name];
+  if (!path) throw new Error(`No existe el icono "${name}".`);
+  return `<svg class="icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>`;
 }
-function statCard(label, value, foot, icon) {
-  return `<article class="stat-card"><div class="stat-top"><span>${label}</span><span class="stat-icon">${icon}</span></div><div class="stat-value">${value}</div><div class="stat-foot">${foot}</div></article>`;
+function pageHeader(title, summary, action = "") {
+  return `<div class="page-heading"><div><p class="eyebrow">Fidegresa · Tu comunidad</p><h1>${title}</h1><p data-live="page-summary">${summary}</p></div>${action}</div>`;
+}
+function kpi(label, value, change, explanation, iconName = "chart") {
+  const variation = change !== null && change !== undefined && Number.isFinite(Number(change))
+    ? `<span class="trend${Number(change) < 0 ? " negative" : ""}">${Number(change) > 0 ? "+" : ""}${Number(change)}%</span><span>vs. mes anterior</span>`
+    : "";
+  return `<article class="kpi-card"><div class="kpi-top"><span>${label}</span><span class="kpi-icon">${icon(iconName,18)}</span></div><div class="kpi-value">${value}</div><div class="kpi-foot">${variation}</div><p class="kpi-explanation">${explanation}</p></article>`;
+}
+function changeOf(series) {
+  const previous = Number(series.at(-2)?.value ?? series.at(-2));
+  const current = Number(series.at(-1)?.value ?? series.at(-1));
+  if (series.length < 2 || !previous || !Number.isFinite(current)) return 0;
+  return Number((((current - previous) / previous) * 100).toFixed(1));
+}
+function monthlySeries(metricName = "ventas") {
+  const source = data.metricas.ventasMensuales;
+  const shape = metricName === "visitas"
+    ? source.map((value, index) => value * (0.68 + (index % 4) * 0.09))
+    : source;
+  const total = metricName === "visitas" ? data.metricas.visitas : data.metricas.ingresos;
+  const scale = total / shape.at(-1);
+  const month = new Date();
+  return shape.map((value, index) => {
+    const date = new Date(month.getFullYear(), month.getMonth() - (shape.length - index - 1), 1);
+    return { label: new Intl.DateTimeFormat(locale, {month:"short", year:"numeric"}).format(date), value: Math.round(value * scale) };
+  });
 }
 function customerTable(customers) {
   if (!customers.length) return `<div class="empty-state">No encontramos clientes para esta búsqueda.</div>`;
   return `<div class="table-wrap"><table class="data-table"><thead><tr><th>CLIENTE</th><th>EMAIL</th><th>TARJETA</th><th>ESTADO</th><th>VISITAS</th><th>ÚLTIMA VISITA</th></tr></thead><tbody>${customers.map(customer => `<tr><td class="customer-cell"><span class="customer-avatar">${escapeHtml(customer.iniciales || initials(customer.nombre))}</span>${escapeHtml(customer.nombre)}</td><td>${escapeHtml(customer.correo)}</td><td>${escapeHtml(customer.tarjeta)}</td><td><span class="status-pill${customer.estado === "Inactiva" ? " inactive" : ""}">${escapeHtml(customer.estado)}</span></td><td>${customer.visitas}</td><td>${escapeHtml(customer.ultimaVisita)}</td></tr>`).join("")}</tbody></table></div>`;
 }
 function chartMarkup() {
-  const values = selectedMetric === "visitas"
-    ? data.metricas.ventasMensuales.map((value,index) => Math.round(value * (.7 + (index % 4) * .08)))
-    : data.metricas.ventasMensuales;
+  const series = monthlySeries(selectedMetric);
+  const values = series.map(item => item.value);
   const width = 650, height = 185, left = 34, top = 15, plotWidth = 595, plotHeight = 137;
-  const points = values.map((value,index) => `${left + index * plotWidth / 11},${top + plotHeight - (value / 80) * plotHeight}`).join(" ");
+  const maxValue = Math.max(...values) * 1.15;
+  const points = values.map((value,index) => `${left + index * plotWidth / 11},${top + plotHeight - (value / maxValue) * plotHeight}`).join(" ");
   const areaPath = `M ${left},${top + plotHeight} L ${points.replaceAll(" ", " L ")} L ${left + plotWidth},${top + plotHeight} Z`;
-  const labels = ["Nov","Dic","Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct"];
-  // El último mes se muestra en soles a partir del dato real (los valores están en miles).
-  const lastSales = money(data.metricas.ventasMensuales.at(-1) * 1000);
-  return `<div class="chart-wrap"><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${selectedMetric === "ventas" ? "Gráfico de ventas" : "Gráfico de visitas"} por mes" preserveAspectRatio="none"><defs><linearGradient id="chart-fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ad8059" stop-opacity=".25"/><stop offset="1" stop-color="#ad8059" stop-opacity=".01"/></linearGradient></defs>${[0,1,2,3].map(index => `<line class="chart-grid" x1="${left}" y1="${top + index * plotHeight / 3}" x2="${left + plotWidth}" y2="${top + index * plotHeight / 3}"/><text class="chart-label" x="0" y="${top + index * plotHeight / 3 + 3}">${selectedMetric === "ventas" ? `${80 - index * 25}k` : 800 - index * 250}</text>`).join("")}<path class="chart-area" d="${areaPath}"/><polyline class="chart-line" points="${points}"/>${values.map((value,index) => `<circle class="chart-dot" cx="${left + index * plotWidth / 11}" cy="${top + plotHeight - (value / 80) * plotHeight}" r="3"/>`).join("")}${labels.map((label,index) => `<text class="chart-label" text-anchor="middle" x="${left + index * plotWidth / 11}" y="${height - 5}">${label}</text>`).join("")}</svg><span class="chart-tooltip">Oct · ${selectedMetric === "ventas" ? lastSales : "684 visitas"}</span></div>`;
+  const formatValue = value => selectedMetric === "ventas" ? money(value) : new Intl.NumberFormat(locale).format(value);
+  const topLabel = selectedMetric === "ventas" ? money(maxValue) : new Intl.NumberFormat(locale).format(maxValue);
+  const pointsHtml = values.map((value,index) => {
+    const x = left + index * plotWidth / 11;
+    const y = top + plotHeight - (value / maxValue) * plotHeight;
+    return `<circle class="chart-dot" cx="${x}" cy="${y}" r="3"><title>${escapeHtml(series[index].label)} · ${formatValue(value)}</title></circle>`;
+  }).join("");
+  return `<div class="chart-wrap" data-live="chart"><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${selectedMetric === "ventas" ? "Gráfico de ventas en soles" : "Gráfico de visitas"} por mes" preserveAspectRatio="none"><defs><linearGradient id="chart-fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ad8059" stop-opacity=".25"/><stop offset="1" stop-color="#ad8059" stop-opacity=".01"/></linearGradient></defs>${[0,1,2,3].map(index => `<line class="chart-grid" x1="${left}" y1="${top + index * plotHeight / 3}" x2="${left + plotWidth}" y2="${top + index * plotHeight / 3}"/><text class="chart-label" x="0" y="${top + index * plotHeight / 3 + 3}">${selectedMetric === "ventas" ? money(maxValue * (1-index/3)) : Math.round(maxValue * (1-index/3))}</text>`).join("")}<path class="chart-area" d="${areaPath}"/><polyline class="chart-line" points="${points}"/>${pointsHtml}${series.map((item,index) => `<text class="chart-label" text-anchor="middle" x="${left + index * plotWidth / 11}" y="${height - 5}">${escapeHtml(item.label.split(" ")[0])}</text>`).join("")}</svg><span class="chart-tooltip">${escapeHtml(series.at(-1).label)} · ${formatValue(values.at(-1))}</span></div><details class="chart-data"><summary>Ver datos mensuales</summary><div class="table-wrap"><table class="data-table"><thead><tr><th>MES</th><th>${selectedMetric === "ventas" ? "VENTAS" : "VISITAS"}</th></tr></thead><tbody>${series.map(item=>`<tr><td>${escapeHtml(item.label)}</td><td>${formatValue(item.value)}</td></tr>`).join("")}</tbody></table></div></details>`;
 }
 function render() {
   document.querySelector("#breadcrumb-current").textContent=titleFor(currentPage);
@@ -143,11 +178,23 @@ function render() {
   document.querySelector(".profile-mini .avatar").textContent=initials(data.configuracion.perfilNombre);
   document.querySelector(".profile-mini span:nth-child(2)").innerHTML=`<strong>${escapeHtml(data.configuracion.perfilNombre)}</strong><small>Administradora</small>`;
   document.querySelectorAll(".nav-link").forEach(link=>link.classList.toggle("active",link.dataset.page===currentPage));
+  document.querySelectorAll("[data-icon]").forEach(node => { node.innerHTML = icon(node.dataset.icon, 18); });
   const renderers=window.fidegresaPageRenderers;
   const renderer=renderers[currentPage];
   if(!renderer) throw new Error(`No se encontró el renderizador de la página "${currentPage}".`);
-  pageContent.innerHTML=renderer({data,heading,statCard,money,customerTable,escapeHtml,initials,chartMarkup,selectedMetric,searchTerm,clientFilter,cardFilter});
+  pageContent.innerHTML=renderer({data,pageHeader,kpi,money,customerTable,escapeHtml,initials,icon,chartMarkup,monthlySeries,changeOf,selectedMetric,searchTerm,clientFilter,cardFilter,reviewFilter});
   document.body.classList.toggle("dark-theme",data.configuracion.tema==="oscuro");
+}
+function refreshLive() {
+  const renderer = window.fidegresaPageRenderers[currentPage];
+  if (!renderer) throw new Error(`No se encontró el renderizador de la página "${currentPage}".`);
+  const html = renderer({data,pageHeader,kpi,money,customerTable,escapeHtml,initials,icon,chartMarkup,monthlySeries,changeOf,selectedMetric,searchTerm,clientFilter,cardFilter,reviewFilter});
+  const template = document.createElement("template");
+  template.innerHTML = html;
+  for (const current of [...pageContent.querySelectorAll("[data-live]")]) {
+    const replacement = template.content.querySelector(`[data-live="${current.dataset.live}"]`);
+    if (replacement) current.replaceWith(replacement);
+  }
 }
 function goTo(page) {
   if (!isValidPage(page)) return;
@@ -158,7 +205,7 @@ function goTo(page) {
   render();
 }
 function openModal(title, subtitle, contents, submitLabel, onSubmit, wide = false) {
-  modalForm.innerHTML=`<div class="modal-head"><div><h2>${title}</h2><p>${subtitle}</p></div><button type="button" class="modal-close" data-action="close-modal" aria-label="Cerrar">×</button></div>${contents}<div class="modal-actions"><button type="button" class="secondary-button" data-action="close-modal">Cancelar</button><button type="submit" class="primary-button">${submitLabel}</button></div>`;
+  modalForm.innerHTML=`<div class="modal-head"><div><h2>${title}</h2><p>${subtitle}</p></div><button type="button" class="modal-close" data-action="close-modal" aria-label="Cerrar">${icon("close",16)}</button></div>${contents}<div class="modal-actions"><button type="button" class="secondary-button" data-action="close-modal">Cancelar</button><button type="submit" class="primary-button" data-action="submit-modal">${submitLabel}</button></div>`;
   modalForm.dataset.wide=wide?"true":"false";
   modalForm.onsubmit=event=>{event.preventDefault();onSubmit(new FormData(modalForm));};
   modal.showModal();
@@ -201,6 +248,19 @@ function exportClients() {
   const link=document.createElement("a");link.href=url;link.download="clientes-fidegresa.csv";link.click();URL.revokeObjectURL(url);
   showToast("Lista de clientes exportada.");
 }
+function notices() {
+  const inactive = data.clientes.filter(person => person.estado === "Inactiva").length;
+  const paused = data.ubicaciones.filter(place => !place.activa).length;
+  const improve = data.resenas.filter(review => review.sentimiento === "Por mejorar").length;
+  return [
+    ...(inactive ? [`${inactive} clientes dejaron de venir recientemente.`] : []),
+    ...(paused ? [`${paused} locales están en pausa.`] : []),
+    ...(improve ? [`${improve} reseñas requieren atención.`] : [])
+  ];
+}
+function confirmInModal(title, description, submitLabel, onConfirm) {
+  openModal(title,description,"",submitLabel,formData=>onConfirm(formData));
+}
 function loadSavedData() {
   try {
     const saved=localStorage.getItem(storeKey);
@@ -210,77 +270,80 @@ function loadSavedData() {
     showToast("No fue posible leer los datos guardados.",true);
   }
 }
-// Carga un JSON opcional. Devuelve null si el archivo no existe o está vacío,
-// para que el panel siga usando los datos de demostración.
-async function fetchOptionalJson(file) {
-  const response=await fetch(`./${jsonFolder}/${encodeURIComponent(file)}`);
-  if(response.status===404) return null;
-  if(!response.ok) throw new Error(`${file}: HTTP ${response.status}`);
-  const text=await response.text();
-  return text.trim()?JSON.parse(text):null;
-}
-async function loadJsonSeedData() {
-  // Al abrir index.html directamente (file://) el navegador no permite fetch.
-  if(location.protocol==="file:") return;
-  // Si ya hay cambios guardados en este navegador, esos tienen prioridad.
-  if(localStorage.getItem(storeKey)) return;
-  try {
-    const entries=await Promise.all(Object.entries(files).map(async([key,file])=>[key,await fetchOptionalJson(file)]));
-    let loaded=false;
-    for(const [key,value] of entries) if(value){data[key]=value;loaded=true;}
-    if(loaded){saveData();render();}
-  } catch(error) {
-    console.error("No se pudieron cargar los datos JSON.",error);
-    showToast("No se pudieron cargar los archivos JSON. Revisa la consola del navegador.",true);
-  }
-}
-
+const actions = {
+  menu: () => document.querySelector("#sidebar").classList.toggle("open"),
+  "new-card": () => cardDialog(),
+  "edit-card": button => {
+    const card=data.tarjetas.find(item=>item.id===Number(button.dataset.id));
+    if(card) cardDialog(card);
+  },
+  "delete-card": button => {
+    const card=data.tarjetas.find(item=>item.id===Number(button.dataset.id));
+    if(!card) return;
+    confirmInModal("Eliminar tarjeta",`¿Quieres eliminar “${escapeHtml(card.nombre)}”? Esta acción no se puede deshacer.`,"Eliminar",()=>{
+      data.tarjetas=data.tarjetas.filter(item=>item.id!==card.id);
+      saveData();modal.close();render();showToast("Tarjeta eliminada.");
+    });
+  },
+  "new-location": () => locationDialog(),
+  "toggle-location": button => {
+    const place=data.ubicaciones.find(item=>item.id===Number(button.dataset.id));
+    if(place){place.activa=!place.activa;saveData();render();showToast(`${place.nombre}: ${place.activa?"local activado":"local pausado"}.`);}
+  },
+  profile: () => profileDialog(),
+  "edit-brand": () => {
+    const content=`<div class="form-field"><label for="brand-name-input">Nombre del programa</label><input id="brand-name-input" class="form-control" name="nombre" required maxlength="50" value="${escapeHtml(data.configuracion.marca)}"></div>`;
+    openModal("Nombre del programa","Actualiza el nombre que aparece en tus tarjetas.",content,"Guardar",formData=>{
+      data.configuracion.marca=String(formData.get("nombre")).trim();
+      saveData();modal.close();render();showToast("Nombre del programa actualizado.");
+    });
+  },
+  theme: button => {data.configuracion.tema=button.dataset.theme;saveData();render();showToast("Tema actualizado.");},
+  "reset-data": () => confirmInModal("Restablecer datos","Se reemplazarán tus cambios por los datos originales de demostración.","Restablecer",()=>{
+    try {
+      localStorage.removeItem(storeKey);
+      data=structuredClone(seedData);
+      saveData();modal.close();render();showToast("Datos de demostración restablecidos.");
+    } catch(error) {
+      console.error("No fue posible restablecer los datos locales.",error);
+      showToast("No fue posible restablecer los datos.",true);
+    }
+  }),
+  notifications: () => {
+    const items=notices();
+    const content=items.length?`<ul class="notice-list">${items.map(item=>`<li>${escapeHtml(item)}</li>`).join("")}</ul>`:`<p class="modal-message">No hay avisos nuevos. Tu programa está al día.</p>`;
+    openModal("Avisos del programa","Información calculada con tus datos locales.",content,"Listo",()=>modal.close());
+  },
+  "close-modal": () => modal.close(),
+  "submit-modal": button => button.form?.requestSubmit(),
+  "export-clients": () => exportClients(),
+  "center-map": () => showToast("Mapa centrado en "+(data.ubicaciones.find(place=>place.id===Number(data.geolocalizacion.ubicacionId))?.nombre||"la ubicación seleccionada")+".")
+};
 document.addEventListener("click",event=>{
   const pageLink=event.target.closest("[data-page]");
   if(pageLink){event.preventDefault();goTo(pageLink.dataset.page);return;}
-  const actionButton=event.target.closest("[data-action]");
-  if(!actionButton)return;
-  const {action,id}=actionButton.dataset;
-  if(action==="menu") document.querySelector("#sidebar").classList.toggle("open");
-  if(action==="new-card") cardDialog();
-  if(action==="edit-card") {const card=data.tarjetas.find(item=>item.id===Number(id));if(card)cardDialog(card);}
-  if(action==="delete-card") {
-    const card=data.tarjetas.find(item=>item.id===Number(id));
-    if(card&&confirm(`¿Eliminar la tarjeta "${card.nombre}"?`)){data.tarjetas=data.tarjetas.filter(item=>item.id!==card.id);saveData();render();showToast("Tarjeta eliminada.");}
-  }
-  if(action==="new-location") locationDialog();
-  if(action==="toggle-location") {
-    const place=data.ubicaciones.find(item=>item.id===Number(id));
-    if(place){place.activa=!place.activa;saveData();render();showToast(`${place.nombre}: ${place.activa?"ubicación activada":"ubicación pausada"}.`);}
-  }
-  if(action==="profile") profileDialog();
-  if(action==="edit-brand") {
-    const name=prompt("Nombre de marca:",data.configuracion.marca);
-    if(name?.trim()){data.configuracion.marca=name.trim().slice(0,50);saveData();render();showToast("Nombre de marca actualizado.");}
-  }
-  if(action==="theme") {data.configuracion.tema=actionButton.dataset.theme;saveData();render();showToast("Tema actualizado.");}
-  if(action==="delete-account"&&confirm("Se borrarán los cambios guardados en este navegador y se restaurarán los datos de demostración. ¿Deseas continuar?")){
-    try{localStorage.removeItem(storeKey);data=structuredClone(seedData);saveData();render();showToast("Cuenta local restablecida.");}
-    catch(error){console.error("No fue posible restablecer la cuenta local.",error);showToast("No fue posible restablecer los datos.",true);}
-  }
-  if(action==="close-modal") modal.close();
-  if(action==="export-clients") exportClients();
-  if(action==="center-map") {showToast("Mapa centrado en "+(data.ubicaciones.find(place=>place.id===Number(data.geolocalizacion.ubicacionId))?.nombre||"la ubicación seleccionada")+".");}
+  const button=event.target.closest("[data-action]");
+  if(!button)return;
+  const action=actions[button.dataset.action];
+  if(!action){console.error(`No existe la acción "${button.dataset.action}".`);return;}
+  if(button.dataset.action==="submit-modal") event.preventDefault();
+  action(button);
 });
 document.addEventListener("input",event=>{
-  if(event.target.id==="client-search"){searchTerm=event.target.value;const cursor=event.target.selectionStart;render();const search=document.querySelector("#client-search");search.focus();search.setSelectionRange(cursor,cursor);}
-  if(event.target.id==="radius-input"){data.geolocalizacion.radio=Number(event.target.value);document.querySelector("#radius-value").textContent=`${event.target.value} m`;const radius=document.querySelector(".map-radius");radius.style.width=`${Math.min(280,90+Number(event.target.value)*.19)}px`;radius.querySelector(".map-radius-label").textContent=`${event.target.value} m`;document.querySelector(".map-canvas").setAttribute("aria-label",`Mapa esquemático con radio de ${event.target.value} metros`);saveData();}
+  if(event.target.id==="client-search"){searchTerm=event.target.value;refreshLive();}
+  if(event.target.id==="radius-input"){data.geolocalizacion.radio=Number(event.target.value);document.querySelector("#radius-value").textContent=`${event.target.value} m`;saveData();refreshLive();}
 });
 document.addEventListener("change",event=>{
-  if(event.target.id==="client-filter"){clientFilter=event.target.value;render();}
-  if(event.target.id==="card-filter"){cardFilter=event.target.value;render();}
-  if(event.target.id==="metric-select"){selectedMetric=event.target.value;render();}
+  if(event.target.id==="client-filter"){clientFilter=event.target.value;refreshLive();}
+  if(event.target.id==="card-filter"){cardFilter=event.target.value;refreshLive();}
+  if(event.target.id==="review-filter"){reviewFilter=event.target.value;refreshLive();}
+  if(event.target.id==="metric-select"){selectedMetric=event.target.value;refreshLive();}
   if(event.target.id==="geo-location"){data.geolocalizacion.ubicacionId=Number(event.target.value);saveData();render();}
 });
 window.addEventListener("popstate",()=>{currentPage=pageFromHash();render();});
 document.querySelector("#today-label").textContent=new Intl.DateTimeFormat(locale,{weekday:"short",day:"numeric",month:"short",year:"numeric"}).format(new Date());
 document.querySelector(".footer span").textContent=`© ${new Date().getFullYear()} Fidegresa`;
+document.querySelector(".footer b").innerHTML=icon("star",12);
 loadSavedData();
 currentPage=pageFromHash();
 render();
-loadJsonSeedData();
