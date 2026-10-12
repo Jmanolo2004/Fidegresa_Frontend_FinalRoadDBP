@@ -585,7 +585,12 @@ document.addEventListener("click",event=>{
     return;
   }
   const authButton=event.target.closest("[data-auth-screen]");
-  if(authButton){showScreen(authButton.dataset.authScreen);return;}
+  if(authButton){
+    const destination=authButton.dataset.authScreen;
+    if(authButton.closest(".marketing-header-actions")) withLoading(destination);
+    else showScreen(destination);
+    return;
+  }
   const pageLink=event.target.closest("[data-page]");
   if(pageLink){event.preventDefault();goTo(pageLink.dataset.page);return;}
   const button=event.target.closest("[data-action]");
