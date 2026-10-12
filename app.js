@@ -58,6 +58,7 @@ const iconPaths = {
   arrow:"<path d='M7 17 17 7M7 7h10v10'/>",
   close:"<path d='m18 6-12 12M6 6l12 12'/>",
   menu:"<path d='M4 6h16M4 12h16M4 18h16'/>",
+  chevron:"<path d='m6 9 6 6 6-6'/>",
   logout:"<path d='M10 17l5-5-5-5m5 5H3'/><path d='M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6'/>"
 };
 
@@ -140,7 +141,7 @@ function icon(name, size = 18) {
   return `<svg class="icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>`;
 }
 function pageHeader(title, summary, action = "") {
-  return `<div class="page-heading"><div><p class="eyebrow">Fidegresa · Tu comunidad</p><h1>${title}</h1><p data-live="page-summary">${summary}</p></div>${action}</div>`;
+  return `<div class="page-heading"><div><h1>${title}</h1><p data-live="page-summary">${summary}</p></div>${action}</div>`;
 }
 function mapPositionFor(district) {
   return mapDistricts[district]||mapDistricts.Miraflores;
@@ -176,6 +177,9 @@ function getReachData() {
   const inRange=nearby.filter(person=>person.distance<=Number(geo.radio));
   return {location,nearby,inRange,outOfRange:nearby.filter(person=>person.distance>Number(geo.radio))};
 }
+function isCustomerActive(customer) {
+  return Date.now()-new Date(customer.ultimaVisita).getTime()<=60*86400000;
+}
 function distanceBetween(latitudeA,longitudeA,latitudeB,longitudeB) {
   const radians=degrees=>degrees*Math.PI/180;
   const lat1=radians(Number(latitudeA)||0);
@@ -209,7 +213,7 @@ function monthlySeries(metricName = "ventas") {
 }
 function customerTable(customers) {
   if (!customers.length) return `<div class="empty-state">No encontramos clientes para esta búsqueda.</div>`;
-  return `<div class="table-wrap"><table class="data-table"><thead><tr><th>CLIENTE</th><th>EMAIL</th><th>UBICACIÓN</th><th>ESTADO</th><th>VISITAS</th><th>ÚLTIMA VISITA</th></tr></thead><tbody>${customers.map(customer => `<tr><td class="customer-cell"><span class="customer-avatar">${escapeHtml(customer.iniciales || initials(customer.nombre))}</span>${escapeHtml(customer.nombre)}</td><td>${escapeHtml(customer.correo)}</td><td>${escapeHtml(customer.distrito||"Sin zona")}</td><td><span class="status-pill${customer.estado === "Inactiva" ? " inactive" : ""}">${escapeHtml(customer.estado)}</span></td><td>${customer.visitas}</td><td>${escapeHtml(customer.ultimaVisita)}</td></tr>`).join("")}</tbody></table></div>`;
+  return `<div class="table-wrap customer-table"><table class="data-table"><thead><tr><th>Cliente</th><th>Correo</th><th>Distrito</th><th>Estado</th><th>Visitas</th><th>Última visita</th></tr></thead><tbody>${customers.map(customer => `<tr><td class="customer-cell" data-label="Cliente"><span class="customer-avatar">${escapeHtml(customer.iniciales || initials(customer.nombre))}</span>${escapeHtml(customer.nombre)}</td><td data-label="Correo">${escapeHtml(customer.correo)}</td><td data-label="Distrito">${escapeHtml(customer.distrito||"Sin zona")}</td><td data-label="Estado"><span class="status-pill${customer.estado === "Inactiva" ? " inactive" : ""}">${escapeHtml(customer.estado)}</span></td><td data-label="Visitas">${customer.visitas}</td><td data-label="Última visita">${escapeHtml(customer.ultimaVisita)}</td></tr>`).join("")}</tbody></table></div>`;
 }
 function chartMarkup() {
   const series = monthlySeries(selectedMetric);
@@ -234,6 +238,11 @@ function render() {
   document.querySelector(".profile-mini span:nth-child(2)").innerHTML=`<strong>${escapeHtml(data.configuracion.perfilNombre)}</strong><small>Administradora</small>`;
   document.querySelectorAll(".nav-link").forEach(link=>link.classList.toggle("active",link.dataset.page===currentPage));
   document.querySelectorAll("[data-icon]").forEach(node => { node.innerHTML = icon(node.dataset.icon, 18); });
+  const notificationCount=document.querySelector("#notification-count");
+  const count=notices().length;
+  notificationCount.textContent=count>9?"9+":String(count);
+  notificationCount.hidden=count===0;
+  document.documentElement.style.setProperty("--brand-primary",data.configuracion.colorPrincipal||"#603f2a");
   const renderers=window.fidegresaPageRenderers;
   const renderer=renderers[currentPage];
   if(!renderer) throw new Error(`No se encontró el renderizador de la página "${currentPage}".`);
@@ -257,6 +266,8 @@ function goTo(page) {
   searchTerm="";
   if (location.hash!==`#${page}`) history.pushState(null,"",`#${page}`);
   document.querySelector("#sidebar").classList.remove("open");
+  document.querySelector("#profile-menu").hidden=true;
+  document.querySelector(".profile-mini").setAttribute("aria-expanded","false");
   render();
 }
 function openModal(title, subtitle, contents, submitLabel, onSubmit, wide = false) {
@@ -512,13 +523,25 @@ function exportClients() {
   showToast("Lista de clientes exportada.");
 }
 function notices() {
-  const inactive = data.clientes.filter(person => person.estado === "Inactiva").length;
+  const preferences=data.configuracion.avisos||{};
+  const inactive = data.clientes.filter(person => !isCustomerActive(person)).length;
   const paused = data.ubicaciones.filter(place => !place.activa).length;
-  const improve = data.resenas.filter(review => review.sentimiento === "Por mejorar").length;
+  const unanswered = data.resenas.filter(review => !review.respuesta).length;
+  const upcomingBirthdays=data.clientes.filter(person=>{
+    if(!person.cumpleanos)return false;
+    const [day,month]=person.cumpleanos.split("/").map(Number);
+    const now=new Date();
+    const birthday=new Date(now.getFullYear(),month-1,day);
+    birthday.setHours(0,0,0,0);
+    const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+    if(birthday<today)birthday.setFullYear(birthday.getFullYear()+1);
+    return (birthday-today)/86400000<=7;
+  }).length;
   return [
-    ...(inactive ? [`${inactive} clientes dejaron de venir recientemente.`] : []),
-    ...(paused ? [`${paused} locales están en pausa.`] : []),
-    ...(improve ? [`${improve} reseñas requieren atención.`] : [])
+    ...(preferences.inactivos!==false&&inactive ? [{message:`${inactive} ${inactive===1?"cliente dejó":"clientes dejaron"} de venir hace más de 60 días.`,page:"clientes"}] : []),
+    ...(preferences.localesEnPausa!==false&&paused ? [{message:`${paused} ${paused===1?"local está":"locales están"} en pausa.`,page:"ubicaciones"}] : []),
+    ...(preferences.resenas!==false&&unanswered ? [{message:`${unanswered} ${unanswered===1?"reseña espera":"reseñas esperan"} respuesta.`,page:"resenas"}] : []),
+    ...(preferences.cumpleanos!==false&&upcomingBirthdays ? [{message:`${upcomingBirthdays} ${upcomingBirthdays===1?"cliente cumple":"clientes cumplen"} años esta semana.`,page:"clientes"}] : [])
   ];
 }
 function confirmInModal(title, description, submitLabel, onConfirm) {
@@ -548,7 +571,16 @@ function loadSavedData() {
   ensureMapData();
 }
 const actions = {
-  menu: () => document.querySelector("#sidebar").classList.toggle("open"),
+  menu: button => {
+    const sidebar=document.querySelector("#sidebar");
+    const open=sidebar.classList.toggle("open");
+    button.setAttribute("aria-expanded",String(open));
+  },
+  "toggle-profile-menu": button => {
+    const menu=document.querySelector("#profile-menu");
+    menu.hidden=!menu.hidden;
+    button.setAttribute("aria-expanded",String(!menu.hidden));
+  },
   logout: () => {
     try {
       sessionStorage.removeItem("fidegresa-demo-session");
@@ -604,7 +636,7 @@ const actions = {
   }),
   notifications: () => {
     const items=notices();
-    const content=items.length?`<ul class="notice-list">${items.map(item=>`<li>${escapeHtml(item)}</li>`).join("")}</ul>`:`<p class="modal-message">No hay avisos nuevos. Tu programa está al día.</p>`;
+    const content=items.length?`<ul class="notice-list">${items.map(item=>`<li><span>${escapeHtml(item.message)}</span><button type="button" class="text-button" data-page="${item.page}">Revisar</button></li>`).join("")}</ul>`:`<p class="modal-message">No hay avisos nuevos. Tu programa está al día.</p>`;
     openModal("Avisos del programa","Información calculada con tus datos locales.",content,"Listo",()=>modal.close());
   },
   "close-modal": () => modal.close(),
@@ -624,6 +656,10 @@ const actions = {
   }
 };
 document.addEventListener("click",event=>{
+  if(!event.target.closest(".profile-menu-wrap")){
+    document.querySelector("#profile-menu").hidden=true;
+    document.querySelector(".profile-mini").setAttribute("aria-expanded","false");
+  }
   const legalLink=event.target.closest("[data-legal-screen]");
   if(legalLink){
     event.preventDefault();
@@ -701,6 +737,10 @@ const finishMapDrag=event=>{
 document.addEventListener("pointerup",finishMapDrag);
 document.addEventListener("pointercancel",finishMapDrag);
 document.addEventListener("keydown",event=>{
+  if(event.key==="Escape"){
+    document.querySelector("#profile-menu").hidden=true;
+    document.querySelector(".profile-mini").setAttribute("aria-expanded","false");
+  }
   const marker=event.target.closest("[data-map-marker]");
   const delta={ArrowLeft:[-12,0],ArrowRight:[12,0],ArrowUp:[0,-12],ArrowDown:[0,12]}[event.key];
   if(!marker||!delta) return;
