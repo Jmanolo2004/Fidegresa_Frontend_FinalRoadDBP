@@ -19,6 +19,7 @@ let searchTerm = "";
 let clientFilter = "Todos";
 let cardFilter = "Todas";
 let reviewFilter = "Todas";
+let reviewResponseFilter = "Todas";
 let selectedMetric = "ventas";
 let selectedPeriod = "month";
 let toastTimer;
@@ -187,6 +188,30 @@ function getReachData() {
   })).sort((first,second)=>first.distance-second.distance);
   const inRange=nearby.filter(person=>person.distance<=Number(geo.radio));
   return {location,nearby,inRange,outOfRange:nearby.filter(person=>person.distance>Number(geo.radio))};
+}
+function reviewReplyDialog(reviewId) {
+  const review=data.resenas.find(item=>Number(item.id)===Number(reviewId));
+  if(!review){
+    showToast("No encontramos esta reseña. Actualiza la vista e inténtalo de nuevo.",true);
+    return;
+  }
+  const form=`<div class="form-field"><label for="review-reply">Tu respuesta</label><textarea id="review-reply" class="form-control" name="respuesta" rows="5" maxlength="500" required aria-describedby="review-reply-hint">${escapeHtml(review.respuesta||"")}</textarea><small class="field-hint" id="review-reply-hint">Hasta 500 caracteres. Se guardará solo en este navegador.</small></div>`;
+  openModal(review.respuesta?"Editar respuesta":"Responder reseña",`${review.nombre} · ${review.negocio} · ${review.calificacion} de 5 estrellas`,form,review.respuesta?"Guardar respuesta":"Publicar respuesta",formData=>{
+    const reply=String(formData.get("respuesta")||"").trim();
+    if(!reply){
+      showToast("Escribe una respuesta antes de guardar.",true);
+      return;
+    }
+    const previous=review.respuesta;
+    review.respuesta=reply;
+    if(!saveData()){
+      review.respuesta=previous;
+      return;
+    }
+    modal.close();
+    render();
+    showToast(previous?"Respuesta actualizada.":"Respuesta guardada.");
+  },true);
 }
 function isCustomerActive(customer) {
   return Date.now()-new Date(customer.ultimaVisita).getTime()<=60*86400000;
@@ -362,13 +387,13 @@ function render() {
   const renderers=window.fidegresaPageRenderers;
   const renderer=renderers[currentPage];
   if(!renderer) throw new Error(`No se encontró el renderizador de la página "${currentPage}".`);
-  pageContent.innerHTML=renderer({data,pageHeader,kpi,money,customerTable,filterCustomers,escapeHtml,initials,icon,chartMarkup,monthlySeries,changeOf,selectedMetric,selectedPeriod,metricsForPeriod,percentageChange,timeAgo,searchTerm,clientFilter,cardFilter,reviewFilter,getReachData});
+  pageContent.innerHTML=renderer({data,pageHeader,kpi,money,customerTable,filterCustomers,escapeHtml,initials,icon,chartMarkup,monthlySeries,changeOf,selectedMetric,selectedPeriod,metricsForPeriod,percentageChange,timeAgo,searchTerm,clientFilter,cardFilter,reviewFilter,reviewResponseFilter,getReachData});
   document.body.classList.toggle("dark-theme",data.configuracion.tema==="oscuro");
 }
 function refreshLive() {
   const renderer = window.fidegresaPageRenderers[currentPage];
   if (!renderer) throw new Error(`No se encontró el renderizador de la página "${currentPage}".`);
-  const html = renderer({data,pageHeader,kpi,money,customerTable,filterCustomers,escapeHtml,initials,icon,chartMarkup,monthlySeries,changeOf,selectedMetric,selectedPeriod,metricsForPeriod,percentageChange,timeAgo,searchTerm,clientFilter,cardFilter,reviewFilter,getReachData});
+  const html = renderer({data,pageHeader,kpi,money,customerTable,filterCustomers,escapeHtml,initials,icon,chartMarkup,monthlySeries,changeOf,selectedMetric,selectedPeriod,metricsForPeriod,percentageChange,timeAgo,searchTerm,clientFilter,cardFilter,reviewFilter,reviewResponseFilter,getReachData});
   const template = document.createElement("template");
   template.innerHTML = html;
   for (const current of [...pageContent.querySelectorAll("[data-live]")]) {
@@ -723,6 +748,7 @@ const actions = {
     if(navigator.onLine) window.setTimeout(()=>showToast("El modo de demostración no utiliza un servidor de conexión."),1000);
   },
   "new-card": () => cardDialog(),
+  "review-reply": button => reviewReplyDialog(button.dataset.id),
   "edit-card": button => {
     const card=data.tarjetas.find(item=>item.id===Number(button.dataset.id));
     if(card) cardDialog(card);
@@ -936,6 +962,7 @@ document.addEventListener("change",event=>{
   if(event.target.id==="client-filter"){clientFilter=event.target.value;refreshLive();}
   if(event.target.id==="card-filter"){cardFilter=event.target.value;refreshLive();}
   if(event.target.id==="review-filter"){reviewFilter=event.target.value;refreshLive();}
+  if(event.target.id==="review-response-filter"){reviewResponseFilter=event.target.value;refreshLive();}
   if(event.target.id==="metric-select"){selectedMetric=event.target.value;refreshLive();}
   if(event.target.id==="period-select"){selectedPeriod=event.target.value;refreshLive();}
   if(event.target.id==="geo-location"){data.geolocalizacion.ubicacionId=Number(event.target.value);saveData();render();}
