@@ -483,7 +483,7 @@ function cardDialog(card) {
           <div class="form-field"><label for="card-color">Color principal</label><div class="color-control"><input id="card-color" name="color" type="color" value="${escapeHtml(color)}"><output for="card-color">${escapeHtml(color)}</output></div></div>
           <div class="form-field"><label for="card-accent">Color de acento</label><div class="color-control"><input id="card-accent" name="colorAcento" type="color" value="${escapeHtml(accent)}"><output for="card-accent">${escapeHtml(accent)}</output></div></div>
           <div class="form-field full"><label for="card-template">Estilo de tarjeta</label><select id="card-template" class="form-control" name="estilo"><option value="elegante"${card?.estilo==="elegante"||!card?" selected":""}>Elegante · degradado y contraste</option><option value="corporativo"${card?.estilo==="corporativo"?" selected":""}>Corporativo · limpio y estructurado</option><option value="vibrante"${card?.estilo==="vibrante"?" selected":""}>Vibrante · acento protagonista</option></select></div>
-          <div class="form-field full"><label for="card-image">Imagen o logotipo (opcional)</label><input id="card-image" class="form-control image-file-input" name="imagenArchivo" type="file" accept="image/png,image/jpeg,image/webp"><small class="field-hint">PNG, JPG o WebP · máximo 500 KB. La imagen se almacena solo en este navegador.</small><input name="imagenActual" type="hidden" value="${escapeHtml(card?.imagen||"")}"><button type="button" class="text-button image-remove"${card?.imagen?"":" hidden"}>Quitar imagen</button></div>
+          <div class="form-field full"><label for="card-image">Imagen o logotipo (opcional)</label><input id="card-image" class="form-control image-file-input" name="imagenArchivo" type="file" accept="image/png,image/jpeg,image/webp" aria-describedby="card-image-hint card-image-status"><small class="field-hint" id="card-image-hint">PNG, JPG o WebP · máximo 500 KB. La imagen se almacena solo en este navegador.</small><small class="field-hint" id="card-image-status" aria-live="polite">${card?.imagen?"Imagen guardada en esta tarjeta.":"No has agregado una imagen."}</small><input name="imagenActual" type="hidden" value="${escapeHtml(card?.imagen||"")}"><button type="button" class="text-button image-remove"${card?.imagen?"":" hidden"}>Quitar imagen</button></div>
         </div>
       </section>
       <section class="designer-section"><div class="designer-section-title"><span>03</span><div><h3>Elementos de la tarjeta</h3><p>Elige qué información mostrar.</p></div></div>
@@ -573,17 +573,24 @@ function cardDialog(card) {
         if(!["image/png","image/jpeg","image/webp"].includes(file.type)||file.size>512000){
           showToast(file.size>512000?"La imagen debe pesar 500 KB o menos.":"Elige una imagen PNG, JPG o WebP.",true);
           event.target.value="";
+          document.querySelector("#card-image-status").textContent=modalForm.elements.imagenActual.value?"Se conserva la imagen guardada.":"No se agregó ninguna imagen.";
           return;
         }
         const reader=new FileReader();
         reader.onload=()=>{
+          if(event.target.files?.[0]!==file)return;
           if(typeof reader.result==="string"){
             modalForm.elements.imagenActual.value=reader.result;
             document.querySelector(".image-remove").hidden=false;
+            document.querySelector("#card-image-status").textContent=`Imagen lista: ${file.name}`;
             updateCardPreview();
           }
         };
-        reader.onerror=()=>showToast("No se pudo previsualizar la imagen seleccionada.",true);
+        reader.onerror=()=>{
+          if(event.target.files?.[0]!==file)return;
+          document.querySelector("#card-image-status").textContent="No se pudo leer la imagen seleccionada.";
+          showToast("No se pudo previsualizar la imagen seleccionada.",true);
+        };
         reader.readAsDataURL(file);
       }
     }
@@ -593,6 +600,7 @@ function cardDialog(card) {
     modalForm.elements.imagenActual.value="";
     document.querySelector("#card-image").value="";
     document.querySelector(".image-remove").hidden=true;
+    document.querySelector("#card-image-status").textContent="No has agregado una imagen.";
     updateCardPreview();
   });
   updateTypeFields();

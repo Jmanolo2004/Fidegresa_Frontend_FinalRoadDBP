@@ -841,6 +841,6 @@ body.dark-theme {
  .card-designer .form-grid { grid-template-columns: minmax(0,1fr); }
  .designer-toggles { grid-template-columns: 1fr; }
  .card-preview-panel { padding: 11px; }
- #card-live-preview .loyalty-card-visual { min-height: 206px; padding: 14px; }
+ .program-card .loyalty-card-visual,#card-live-preview .loyalty-card-visual { min-height: 206px; aspect-ratio: auto; padding: 14px; }
  .loyalty-card-copy h3 { font-size: 15px; }
 }
