@@ -299,9 +299,28 @@ function percentageChange(current,previous) {
   if(!previous)return current?100:0;
   return Number(((current-previous)/previous*100).toFixed(1));
 }
+function filterCustomers(term=searchTerm,status=clientFilter) {
+  const normalize=value=>String(value??"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase(locale);
+  const query=normalize(term.trim());
+  const phoneQuery=query.replace(/\D/g,"");
+  return data.clientes.filter(customer=>{
+    if(status!=="Todos"&&customer.estado!==status)return false;
+    const local=data.ubicaciones.find(place=>Number(place.id)===Number(customer.localId));
+    const searchable=normalize(`${customer.nombre} ${customer.correo} ${customer.telefono} ${customer.tarjeta} ${customer.distrito} ${local?.nombre||""}`);
+    const phone=String(customer.telefono||"").replace(/\D/g,"");
+    return !query||searchable.includes(query)||(phoneQuery.length>=3&&phone.includes(phoneQuery));
+  }).sort((first,second)=>new Date(second.ultimaVisita)-new Date(first.ultimaVisita));
+}
 function customerTable(customers) {
-  if (!customers.length) return `<div class="empty-state">No encontramos clientes para esta búsqueda.</div>`;
-  return `<div class="table-wrap customer-table"><table class="data-table"><thead><tr><th>Cliente</th><th>Correo</th><th>Distrito</th><th>Estado</th><th>Visitas</th><th>Última visita</th></tr></thead><tbody>${customers.map(customer => `<tr><td class="customer-cell" data-label="Cliente"><span class="customer-avatar">${escapeHtml(customer.iniciales || initials(customer.nombre))}</span>${escapeHtml(customer.nombre)}</td><td data-label="Correo">${escapeHtml(customer.correo)}</td><td data-label="Distrito">${escapeHtml(customer.distrito||"Sin zona")}</td><td data-label="Estado"><span class="status-pill${customer.estado === "Inactiva" ? " inactive" : ""}">${escapeHtml(customer.estado)}</span></td><td data-label="Visitas">${customer.visitas}</td><td data-label="Última visita">${escapeHtml(customer.ultimaVisita)}</td></tr>`).join("")}</tbody></table></div>`;
+  if (!customers.length) return `<div class="empty-state">No encontramos clientes para esta búsqueda. Prueba con otro nombre, correo, teléfono o local.</div>`;
+  const formatDate=value=>new Intl.DateTimeFormat(locale,{day:"numeric",month:"short",year:"numeric"}).format(new Date(value));
+  return `<div class="table-wrap customer-table"><table class="data-table"><thead><tr><th>Cliente</th><th>Contacto</th><th>Local</th><th>Distrito</th><th>Actividad</th><th>Visitas</th><th>Última visita</th></tr></thead><tbody>${customers.map(customer=>{
+    const local=data.ubicaciones.find(place=>Number(place.id)===Number(customer.localId));
+    const email=String(customer.correo||"");
+    const phone=String(customer.telefono||"");
+    const phoneNumber=phone.replace(/\D/g,"");
+    return `<tr><td class="customer-cell" data-label="Cliente"><span class="customer-avatar">${escapeHtml(customer.iniciales||initials(customer.nombre))}</span><span>${escapeHtml(customer.nombre)}</span></td><td class="customer-contact" data-label="Contacto">${email?`<a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a>`:`<span>Sin correo</span>`}${phoneNumber?`<a href="tel:${phoneNumber}">${escapeHtml(phone)}</a>`:`<span>Sin teléfono</span>`}</td><td data-label="Local">${escapeHtml(local?.nombre||customer.tarjeta||"Sin local")}</td><td data-label="Distrito">${escapeHtml(customer.distrito||local?.distrito||"Sin zona")}</td><td data-label="Actividad"><span class="status-pill${customer.estado==="Inactiva"?" inactive":""}">${escapeHtml(customer.estado)}</span></td><td data-label="Visitas">${Number(customer.visitas)||0}</td><td data-label="Última visita"><span title="${escapeHtml(formatDate(customer.ultimaVisita))}">${escapeHtml(timeAgo(customer.ultimaVisita))}</span></td></tr>`;
+  }).join("")}</tbody></table></div>`;
 }
 function chartMarkup() {
   const series = monthlySeries(selectedMetric);
@@ -343,13 +362,13 @@ function render() {
   const renderers=window.fidegresaPageRenderers;
   const renderer=renderers[currentPage];
   if(!renderer) throw new Error(`No se encontró el renderizador de la página "${currentPage}".`);
-  pageContent.innerHTML=renderer({data,pageHeader,kpi,money,customerTable,escapeHtml,initials,icon,chartMarkup,monthlySeries,changeOf,selectedMetric,selectedPeriod,metricsForPeriod,percentageChange,timeAgo,searchTerm,clientFilter,cardFilter,reviewFilter,getReachData});
+  pageContent.innerHTML=renderer({data,pageHeader,kpi,money,customerTable,filterCustomers,escapeHtml,initials,icon,chartMarkup,monthlySeries,changeOf,selectedMetric,selectedPeriod,metricsForPeriod,percentageChange,timeAgo,searchTerm,clientFilter,cardFilter,reviewFilter,getReachData});
   document.body.classList.toggle("dark-theme",data.configuracion.tema==="oscuro");
 }
 function refreshLive() {
   const renderer = window.fidegresaPageRenderers[currentPage];
   if (!renderer) throw new Error(`No se encontró el renderizador de la página "${currentPage}".`);
-  const html = renderer({data,pageHeader,kpi,money,customerTable,escapeHtml,initials,icon,chartMarkup,monthlySeries,changeOf,selectedMetric,selectedPeriod,metricsForPeriod,percentageChange,timeAgo,searchTerm,clientFilter,cardFilter,reviewFilter,getReachData});
+  const html = renderer({data,pageHeader,kpi,money,customerTable,filterCustomers,escapeHtml,initials,icon,chartMarkup,monthlySeries,changeOf,selectedMetric,selectedPeriod,metricsForPeriod,percentageChange,timeAgo,searchTerm,clientFilter,cardFilter,reviewFilter,getReachData});
   const template = document.createElement("template");
   template.innerHTML = html;
   for (const current of [...pageContent.querySelectorAll("[data-live]")]) {
@@ -613,7 +632,16 @@ function profileDialog() {
   });
 }
 function exportClients() {
-  const rows=[["Nombre","Correo","Ubicación","Estado","Visitas","Última visita"],...data.clientes.map(person=>[person.nombre,person.correo,person.distrito||"Sin zona",person.estado,person.visitas,person.ultimaVisita])];
+  const rows=[["Nombre","Correo","Teléfono","Local","Distrito","Estado","Visitas","Última visita"],...filterCustomers().map(person=>[
+    person.nombre,
+    person.correo,
+    person.telefono||"",
+    data.ubicaciones.find(place=>Number(place.id)===Number(person.localId))?.nombre||person.tarjeta||"Sin local",
+    person.distrito||"Sin zona",
+    person.estado,
+    person.visitas,
+    person.ultimaVisita
+  ])];
   const csv="\uFEFF"+rows.map(row=>row.map(value=>`"${String(value).replaceAll('"','""')}"`).join(",")).join("\r\n");
   const url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
   const link=document.createElement("a");link.href=url;link.download="clientes-fidegresa.csv";link.click();URL.revokeObjectURL(url);
