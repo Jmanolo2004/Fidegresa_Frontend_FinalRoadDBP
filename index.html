@@ -20,9 +20,407 @@
     <script src="./app.js" defer></script>
   </head>
   <body>
-    <div class="app-shell">
+    <section class="loading-screen" id="loading-screen" aria-live="polite" aria-label="Cargando Fidegresa">
+      <img src="./assets/logo.svg" alt="Fidegresa, Fideliza y regresa" />
+      <span class="loading-spinner" aria-hidden="true"></span>
+      <p>Preparando tu espacio...</p>
+    </section>
+
+    <main class="marketing-screen" id="landing-screen" hidden>
+      <header class="marketing-header">
+        <a class="marketing-brand" href="#landing-top" data-public-home aria-label="Fidegresa, inicio">
+          <img src="./assets/favicon.svg" alt="" />
+          <span>Fidegresa<small>Fideliza y regresa</small></span>
+        </a>
+        <nav class="marketing-nav" aria-label="Navegación del sitio">
+          <a href="#como-funciona">Cómo funciona</a>
+          <a href="#planes">Planes</a>
+          <a href="#preguntas">Preguntas</a>
+        </nav>
+        <div class="marketing-header-actions">
+          <button type="button" class="link-button marketing-login" data-auth-screen="login">Iniciar sesión</button>
+          <button type="button" class="marketing-start" data-auth-screen="register">Comenzar gratis</button>
+        </div>
+      </header>
+
+      <section class="marketing-hero" id="landing-top">
+        <div class="marketing-hero-copy">
+          <span class="marketing-kicker">Un programa de lealtad hecho para crecer contigo</span>
+          <h1>Haz que cada visita tenga una razón para <em>volver.</em></h1>
+          <p>Fidegresa ayuda a los negocios locales a reconocer a sus clientes, premiar su preferencia y convertir buenas experiencias en relaciones duraderas.</p>
+          <div class="marketing-hero-actions">
+            <button type="button" class="marketing-start" data-auth-screen="register">Comienza gratis</button>
+            <a class="marketing-secondary" href="#como-funciona">Conoce Fidegresa <span aria-hidden="true">↓</span></a>
+          </div>
+          <span class="marketing-note">Sin costo para empezar · Diseñado para negocios locales</span>
+        </div>
+        <div class="marketing-hero-visual" aria-label="Ejemplo de tarjeta de fidelización">
+          <div class="marketing-orbit marketing-orbit-one"></div>
+          <div class="marketing-orbit marketing-orbit-two"></div>
+          <article class="marketing-loyalty-card">
+            <span class="loyalty-card-brand"><img src="./assets/favicon.svg" alt="" /> Café de la Plaza</span>
+            <span class="loyalty-card-caption">UN DETALLE EN CADA VISITA</span>
+            <strong>Tu próximo café<br />va por nuestra cuenta.</strong>
+            <div class="loyalty-stamps" aria-label="Seis de diez visitas">
+              <i>✓</i><i>✓</i><i>✓</i><i>✓</i><i>✓</i><i>✓</i><i></i><i></i><i></i><i></i>
+            </div>
+            <span class="loyalty-card-foot">6 de 10 visitas · ¡Ya casi!</span>
+          </article>
+          <div class="marketing-float-note"><span>↗</span><strong>Más visitas,<br />más motivos para volver</strong></div>
+        </div>
+      </section>
+
+      <section class="marketing-section marketing-how" id="como-funciona">
+        <div class="marketing-section-heading">
+          <span class="marketing-kicker">Fidelizar, sin complicaciones</span>
+          <h2>Un mejor vínculo empieza con un pequeño detalle.</h2>
+          <p>Fidegresa reúne en un solo lugar las herramientas para crear beneficios, conocer a tus clientes y tomar decisiones con más claridad.</p>
+        </div>
+        <div class="marketing-feature-grid">
+          <article class="marketing-feature">
+            <span class="marketing-feature-icon">01</span>
+            <h3>Crea tu programa</h3>
+            <p>Personaliza tarjetas de visitas o cashback con recompensas pensadas para tu negocio.</p>
+          </article>
+          <article class="marketing-feature">
+            <span class="marketing-feature-icon">02</span>
+            <h3>Premia cada regreso</h3>
+            <p>Reconoce la preferencia de tus clientes y dales una buena razón para elegirte de nuevo.</p>
+          </article>
+          <article class="marketing-feature">
+            <span class="marketing-feature-icon">03</span>
+            <h3>Entiende lo que pasa</h3>
+            <p>Observa visitas, ventas, opiniones y actividad por local desde un panel sencillo.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="marketing-section marketing-card-types">
+        <div class="marketing-section-heading">
+          <span class="marketing-kicker">Tarjetas para tu forma de atender</span>
+          <h2>Elige cómo quieres dar las gracias.</h2>
+          <p>Crea una experiencia de fidelización que se sienta natural para ti y valiosa para tus clientes.</p>
+        </div>
+        <div class="marketing-card-grid">
+          <article class="marketing-type-card stamp-type">
+            <span class="type-label">Visitas que suman</span>
+            <h3>Tarjeta de estampillas</h3>
+            <p>Registra cada visita y entrega una recompensa al completar la tarjeta. Simple, familiar y motivadora.</p>
+            <div class="type-stamps" aria-hidden="true"><i>✓</i><i>✓</i><i>✓</i><i></i><i></i><i></i></div>
+          </article>
+          <article class="marketing-type-card cashback-type">
+            <span class="type-label">Una parte de vuelta</span>
+            <h3>Tarjeta cashback</h3>
+            <p>Devuelve un porcentaje de cada compra como beneficio para una próxima visita.</p>
+            <div class="type-cashback"><strong>5%</strong><span>de vuelta en tus compras</span></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="marketing-insights">
+        <div>
+          <span class="marketing-kicker">Tu negocio, con más contexto</span>
+          <h2>Conoce mejor a quienes vuelven.</h2>
+          <p>El panel organiza la actividad de tu programa para ayudarte a ver tendencias y cuidar cada relación con tus clientes.</p>
+          <ul>
+            <li>Compara visitas y ventas a lo largo de los meses.</li>
+            <li>Revisa la actividad, recurrencia y ubicación de tus clientes.</li>
+            <li>Lee las reseñas y detecta qué experiencias puedes mejorar.</li>
+            <li>Consulta el rendimiento de tus locales desde un mismo espacio.</li>
+          </ul>
+          <p class="marketing-privacy-note">Los datos de este prototipo son de demostración y se guardan localmente en tu navegador.</p>
+        </div>
+        <div class="insight-preview" aria-label="Resumen ilustrativo del panel">
+          <div class="insight-preview-top"><span>Resumen de actividad</span><span>Este mes⌄</span></div>
+          <div class="insight-number"><strong>+18%</strong><span>visitas recurrentes</span></div>
+          <svg viewBox="0 0 420 130" role="img" aria-label="Tendencia ilustrativa de visitas en aumento">
+            <path d="M0 112 C35 105 46 89 78 94 S129 69 160 78 S211 51 243 65 S290 37 321 47 S367 19 420 13" fill="none" stroke="#c8894f" stroke-width="4" stroke-linecap="round"/>
+            <path d="M0 112 C35 105 46 89 78 94 S129 69 160 78 S211 51 243 65 S290 37 321 47 S367 19 420 13 L420 130 L0 130Z" fill="url(#insight-fill)" opacity=".32"/>
+            <defs><linearGradient id="insight-fill" x1="210" y1="0" x2="210" y2="130"><stop stop-color="#c8894f"/><stop offset="1" stop-color="#c8894f" stop-opacity="0"/></linearGradient></defs>
+          </svg>
+          <div class="insight-preview-labels"><span>ENE</span><span>MAR</span><span>MAY</span><span>JUL</span><span>SEP</span><span>DIC</span></div>
+          <div class="insight-preview-bottom"><span>Clientes que regresan</span><strong>+12 este mes</strong></div>
+        </div>
+      </section>
+
+      <section class="marketing-section marketing-pricing" id="planes">
+        <div class="marketing-section-heading">
+          <span class="marketing-kicker">Planes simples y transparentes</span>
+          <h2>Empieza a tu ritmo. Crece a tu manera.</h2>
+          <p>Elige el plan que acompaña el momento de tu negocio. Puedes comenzar gratis.</p>
+        </div>
+        <div class="pricing-grid">
+          <article class="pricing-card">
+            <span class="pricing-name">Esencial</span><h3>Para dar el primer paso</h3>
+            <p class="pricing-amount"><strong>$0</strong><span>USD / mes</span></p>
+            <ul><li>1 local</li><li>Tarjeta de estampillas</li><li>Panel básico de actividad</li><li>Hasta 50 clientes</li></ul>
+            <button type="button" class="pricing-button" data-auth-screen="register">Comenzar gratis</button>
+          </article>
+          <article class="pricing-card">
+            <span class="pricing-name">Emprende</span><h3>Para fidelizar cada día</h3>
+            <p class="pricing-amount"><strong>$10</strong><span>USD / mes</span></p>
+            <ul><li>Hasta 2 locales</li><li>Estampillas y cashback</li><li>Panel de métricas</li><li>Hasta 500 clientes</li></ul>
+            <button type="button" class="pricing-button" data-auth-screen="register">Elegir Emprende</button>
+          </article>
+          <article class="pricing-card pricing-featured">
+            <span class="pricing-popular">Más elegido</span>
+            <span class="pricing-name">Crece</span><h3>Para conocer a tus clientes</h3>
+            <p class="pricing-amount"><strong>$30</strong><span>USD / mes</span></p>
+            <ul><li>Hasta 5 locales</li><li>Todos los tipos de tarjeta</li><li>Métricas y tendencias</li><li>Reseñas y geolocalización</li></ul>
+            <button type="button" class="pricing-button" data-auth-screen="register">Elegir Crece</button>
+          </article>
+          <article class="pricing-card">
+            <span class="pricing-name">Avanza</span><h3>Para equipos en expansión</h3>
+            <p class="pricing-amount"><strong>$60</strong><span>USD / mes</span></p>
+            <ul><li>Hasta 15 locales</li><li>Panel completo de análisis</li><li>Gestión avanzada de clientes</li><li>Acompañamiento prioritario</li></ul>
+            <button type="button" class="pricing-button" data-auth-screen="register">Elegir Avanza</button>
+          </article>
+        </div>
+        <p class="pricing-disclaimer">Precios ilustrativos para la presentación del producto. Este prototipo no procesa pagos ni activa suscripciones.</p>
+      </section>
+
+      <section class="marketing-section marketing-faq" id="preguntas">
+        <div class="marketing-section-heading">
+          <span class="marketing-kicker">¿Tienes dudas?</span>
+          <h2>Preguntas frecuentes</h2>
+        </div>
+        <div class="faq-list">
+          <details><summary>¿Qué es Fidegresa?</summary><p>Es un panel de fidelización para que los negocios creen programas de recompensas, revisen su actividad y cuiden la relación con sus clientes.</p></details>
+          <details><summary>¿Qué tipos de tarjetas puedo ofrecer?</summary><p>Puedes elegir tarjetas de estampillas, que premian las visitas acumuladas, o cashback, que devuelve un porcentaje de la compra como beneficio.</p></details>
+          <details><summary>¿Necesito conocimientos técnicos?</summary><p>No. Fidegresa está pensado para que configures el programa de tu negocio desde un panel sencillo y fácil de entender.</p></details>
+          <details><summary>¿Cómo me ayuda a entender el comportamiento de mis clientes?</summary><p>El panel presenta tendencias de visitas y ventas, actividad de clientes, reseñas y datos por ubicación para que puedas observar patrones y mejorar tu servicio.</p></details>
+          <details><summary>¿Puedo cambiar de plan?</summary><p>Los planes mostrados son referenciales. Esta demostración no gestiona suscripciones ni pagos.</p></details>
+          <details><summary>¿Fidegresa ya crea cuentas y almacena mis datos en la nube?</summary><p>No en esta versión. Es un prototipo local: no envía datos a servidores y no ofrece autenticación real.</p></details>
+        </div>
+      </section>
+
+      <section class="marketing-cta">
+        <span class="marketing-kicker">Cada regreso cuenta</span>
+        <h2>Comienza a fidelizar a tus clientes</h2>
+        <p>Da el primer paso para crear una experiencia que invite a volver.</p>
+        <button type="button" class="marketing-start" data-auth-screen="register">Crear mi cuenta gratis</button>
+      </section>
+
+      <footer class="marketing-footer">
+        <div class="marketing-footer-main">
+          <div class="marketing-footer-brand">
+            <a class="marketing-brand" href="#landing-top" data-public-home aria-label="Fidegresa, inicio">
+              <img src="./assets/favicon.svg" alt="" />
+              <span>Fidegresa<small>Fideliza y regresa</small></span>
+            </a>
+            <p>Pequeños momentos, grandes lealtades.</p>
+          </div>
+          <div class="marketing-footer-column">
+            <h3>Información</h3>
+            <a href="mailto:contacto@fidegresa.com">contacto@fidegresa.com</a>
+            <a href="#terminos" data-legal-screen="terms">Términos y condiciones</a>
+            <a href="#privacidad" data-legal-screen="privacy">Política de privacidad</a>
+          </div>
+          <div class="marketing-footer-column">
+            <h3>Producto</h3>
+            <a href="#como-funciona">Cómo funciona</a>
+            <a href="#planes">Planes</a>
+            <a href="#preguntas">Preguntas frecuentes</a>
+          </div>
+          <div class="marketing-footer-column marketing-footer-user">
+            <h3>Usuario</h3>
+            <button type="button" data-auth-screen="login">Iniciar sesión</button>
+            <button type="button" data-auth-screen="register">Crear cuenta</button>
+            <p class="complaint-notice">De conformidad con la Ley N° 29571, Código de Protección y Defensa del Consumidor, este establecimiento pone a tu disposición el Libro de Reclamaciones para registrar cualquier consulta, queja o reclamo relacionado con nuestros productos y servicios.</p>
+          </div>
+        </div>
+        <div class="marketing-footer-bottom">
+          <span>© 2026 Fidegresa · Prototipo de demostración</span>
+          <span>Los precios y funciones se presentan con fines informativos.</span>
+        </div>
+      </footer>
+    </main>
+
+    <main class="legal-screen" id="terms-screen" hidden>
+      <header class="legal-header">
+        <a class="marketing-brand" href="#landing-top" data-public-home aria-label="Fidegresa, volver al sitio">
+          <img src="./assets/favicon.svg" alt="" />
+          <span>Fidegresa<small>Fideliza y regresa</small></span>
+        </a>
+        <button type="button" class="legal-back" data-public-home>Volver a Fidegresa</button>
+      </header>
+      <article class="legal-document">
+        <a class="legal-return" href="#landing-top" data-public-home>← Volver al sitio</a>
+        <span class="marketing-kicker">Programa de fidelización</span>
+        <h1>Términos y condiciones</h1>
+        <p class="legal-lead">Estas condiciones describen, en lenguaje sencillo, cómo se propone que funcionen los programas de fidelización creados con Fidegresa.</p>
+        <p class="legal-demo-note">Esta página pertenece a una demostración de interfaz. Fidegresa aún no ofrece un servicio conectado, cuentas reales, pagos ni tarjetas activas; este contenido es informativo y debe revisarse antes de usarlo como documento contractual.</p>
+        <section>
+          <h2>1. Alcance del programa</h2>
+          <p>Fidegresa es una plataforma propuesta para que cada negocio participante configure beneficios y comunique sus reglas a sus clientes. El negocio que crea una tarjeta es responsable de definir la recompensa, las condiciones para obtenerla y la forma de canjearla.</p>
+        </section>
+        <section>
+          <h2>2. Tipos de tarjeta y recompensas</h2>
+          <p>El programa puede incluir tarjetas de estampillas, en las que las visitas o compras válidas acumulan avances hacia una recompensa, y tarjetas de cashback, que ofrecen un porcentaje de vuelta según las reglas anunciadas por el negocio. Cada tarjeta debe indicar con claridad su vigencia, límites, exclusiones y condiciones de canje.</p>
+        </section>
+        <section>
+          <h2>3. Participación de los clientes</h2>
+          <p>Los clientes participan de acuerdo con las condiciones publicadas para cada programa. Las recompensas son ofrecidas por el negocio que las anuncia; salvo que se informe expresamente lo contrario, no son dinero en efectivo ni pueden transferirse o combinarse con otras promociones.</p>
+        </section>
+        <section>
+          <h2>4. Responsabilidades del negocio</h2>
+          <p>El negocio debe mantener actualizada la información de sus locales y tarjetas, explicar las reglas antes de la participación y respetar los beneficios válidamente obtenidos. También debe atender consultas o reclamos relacionados con sus productos, servicios y promociones.</p>
+        </section>
+        <section>
+          <h2>5. Planes y precios</h2>
+          <p>Los planes y precios que aparecen en esta página son referenciales y están expresados en dólares estadounidenses. No representan una oferta de suscripción vigente: esta demostración no procesa pagos ni activa planes. Si el servicio se ofrece comercialmente, se informarán previamente el precio aplicable, impuestos, periodicidad y condiciones de cancelación.</p>
+        </section>
+        <section>
+          <h2>6. Uso responsable y cambios</h2>
+          <p>El panel debe utilizarse de forma lícita y respetuosa, sin manipular los registros de visitas ni presentar beneficios de manera engañosa. En un servicio operativo, cualquier cambio material en las reglas o condiciones deberá comunicarse de forma clara a los negocios y usuarios afectados.</p>
+        </section>
+        <section>
+          <h2>7. Consultas y reclamos</h2>
+          <p>Para consultas sobre Fidegresa, puedes escribir a <a href="mailto:contacto@fidegresa.com">contacto@fidegresa.com</a>. Los reclamos sobre una recompensa específica deben dirigirse también al negocio que la ofrece.</p>
+        </section>
+      </article>
+      <footer class="legal-footer">© 2026 Fidegresa · Información del prototipo</footer>
+    </main>
+
+    <main class="legal-screen" id="privacy-screen" hidden>
+      <header class="legal-header">
+        <a class="marketing-brand" href="#landing-top" data-public-home aria-label="Fidegresa, volver al sitio">
+          <img src="./assets/favicon.svg" alt="" />
+          <span>Fidegresa<small>Fideliza y regresa</small></span>
+        </a>
+        <button type="button" class="legal-back" data-public-home>Volver a Fidegresa</button>
+      </header>
+      <article class="legal-document">
+        <a class="legal-return" href="#landing-top" data-public-home>← Volver al sitio</a>
+        <span class="marketing-kicker">Tus datos, con claridad</span>
+        <h1>Política de privacidad</h1>
+        <p class="legal-lead">Aquí explicamos qué ocurre con la información mientras exploras esta demostración y qué principios debería seguir el servicio de fidelización.</p>
+        <p class="legal-demo-note">La versión actual es un prototipo local: no tiene cuentas reales ni envía información a un servidor. Esta política describe el comportamiento de la demostración y no sustituye el aviso que deberá publicarse si se habilita un servicio en línea.</p>
+        <section>
+          <h2>1. Información de esta demostración</h2>
+          <p>Los datos de ejemplo y los cambios que realices en el panel se guardan en el almacenamiento local de tu navegador. Si inicias la sesión de demostración, el correo usado se conserva temporalmente en el almacenamiento de sesión para mostrar el estado de acceso. Las contraseñas no se guardan.</p>
+        </section>
+        <section>
+          <h2>2. Sin transmisión a servidores</h2>
+          <p>Esta interfaz no envía los datos que ingresas a Fidegresa ni a terceros: no utiliza servicios de autenticación, APIs o bases de datos remotas. No introduzcas información personal o comercial real en este prototipo.</p>
+        </section>
+        <section>
+          <h2>3. Ubicación y analítica</h2>
+          <p>La vista de geolocalización utiliza datos de demostración y no solicita la ubicación real de las personas. El prototipo tampoco incorpora herramientas de seguimiento o analítica web.</p>
+        </section>
+        <section>
+          <h2>4. Cómo eliminar los datos locales</h2>
+          <p>Puedes borrar los datos del panel restableciéndolos desde Configuración o eliminando el almacenamiento del sitio en tu navegador. Cerrar la pestaña termina la sesión de demostración guardada en el almacenamiento de sesión.</p>
+        </section>
+        <section>
+          <h2>5. Datos en un servicio futuro</h2>
+          <p>Si Fidegresa habilita cuentas y servicios en línea, se deberá informar antes de recopilar datos qué información se trata, con qué finalidad y base legal, quién es responsable de su tratamiento, cuánto tiempo se conserva, con quién se comparte y cómo ejercer los derechos correspondientes.</p>
+        </section>
+        <section>
+          <h2>6. Contacto</h2>
+          <p>Para consultas sobre esta demostración o privacidad, puedes escribir a <a href="mailto:contacto@fidegresa.com">contacto@fidegresa.com</a>.</p>
+        </section>
+      </article>
+      <footer class="legal-footer">© 2026 Fidegresa · Información del prototipo</footer>
+    </main>
+
+    <main class="auth-screen" id="login-screen" hidden>
+      <section class="auth-panel">
+        <a class="auth-brand" href="#landing-top" data-public-home aria-label="Fidegresa, información">
+          <img src="./assets/favicon.svg" alt="" />
+          <span>Fidegresa<small>Fideliza y regresa</small></span>
+        </a>
+        <div class="auth-form-wrap">
+          <p class="eyebrow">Tu negocio, más cerca</p>
+          <h1>Bienvenido de vuelta</h1>
+          <p class="auth-intro">Ingresa tus datos para volver a tu espacio de fidelización.</p>
+          <form class="auth-form" id="login-form">
+            <label for="login-email">Correo electrónico</label>
+            <input id="login-email" name="email" type="email" autocomplete="email" placeholder="tu@negocio.com" required />
+            <label for="login-password">Contraseña</label>
+            <input id="login-password" name="password" type="password" autocomplete="current-password" placeholder="Ingresa tu contraseña" required />
+            <button class="auth-primary" type="submit">Iniciar sesión</button>
+          </form>
+          <p class="auth-switch">¿Aún no tienes cuenta? <button type="button" class="link-button" data-auth-screen="register">Crear cuenta</button></p>
+          <button type="button" class="connection-link" data-auth-screen="connection">¿Problemas para conectarte?</button>
+          <p class="prototype-note">Demostración local: no se envían ni se guardan tus credenciales.</p>
+        </div>
+        <span class="auth-copyright">© 2026 Fidegresa</span>
+      </section>
+      <aside class="auth-showcase" aria-label="Tarjetas de fidelización">
+        <div class="showcase-copy">
+          <span class="showcase-kicker">Una razón más para volver</span>
+          <h2>Pequeños momentos,<br />grandes lealtades.</h2>
+          <p>Descubre beneficios creados para los negocios de tu comunidad.</p>
+        </div>
+        <div class="showcase-cards" id="auth-cards"></div>
+        <span class="showcase-decoration" aria-hidden="true"></span>
+      </aside>
+    </main>
+
+    <main class="auth-screen register-screen" id="register-screen" hidden>
+      <section class="auth-panel register-panel">
+        <a class="auth-brand" href="#landing-top" data-public-home aria-label="Fidegresa, información">
+          <img src="./assets/favicon.svg" alt="" />
+          <span>Fidegresa<small>Fideliza y regresa</small></span>
+        </a>
+        <div class="auth-form-wrap register-form-wrap">
+          <p class="eyebrow">Empieza hoy</p>
+          <h1>Crea tu cuenta</h1>
+          <p class="auth-intro">Cuéntanos de tu negocio y prepara tu programa de fidelización.</p>
+          <form class="auth-form register-form" id="register-form">
+            <label for="business-name">Nombre del negocio</label>
+            <input id="business-name" name="business" autocomplete="organization" placeholder="Ej. Café de la Plaza" required maxlength="60" />
+            <label for="business-category">Tipo de negocio</label>
+            <select id="business-category" name="category" required>
+              <option value="" disabled selected>Selecciona una categoría</option>
+              <option>Cafetería</option><option>Restaurante</option><option>Repostería</option><option>Barbería</option><option>Otro</option>
+            </select>
+            <div class="form-pair">
+              <div><label for="owner-first-name">Nombre del dueño</label><input id="owner-first-name" name="firstName" autocomplete="given-name" placeholder="Nombre" required maxlength="50" /></div>
+              <div><label for="owner-last-name">Apellido del dueño</label><input id="owner-last-name" name="lastName" autocomplete="family-name" placeholder="Apellido" required maxlength="50" /></div>
+            </div>
+            <label for="register-email">Correo personal o corporativo</label>
+            <input id="register-email" name="email" type="email" autocomplete="email" placeholder="tu@negocio.com" required maxlength="120" />
+            <label for="register-password">Contraseña</label>
+            <input id="register-password" name="password" type="password" autocomplete="new-password" placeholder="Al menos 8 caracteres" minlength="8" required />
+            <button class="auth-primary" type="submit">Crear cuenta</button>
+          </form>
+          <p class="auth-switch">¿Ya tienes cuenta? <button type="button" class="link-button" data-auth-screen="login">Iniciar sesión</button></p>
+          <p class="prototype-note">Prototipo local: la contraseña solo se valida en esta pantalla y nunca se almacena.</p>
+        </div>
+        <span class="auth-copyright">© 2026 Fidegresa</span>
+      </section>
+      <aside class="auth-showcase register-showcase">
+        <div class="showcase-copy">
+          <span class="showcase-kicker">Bienvenido a tu comunidad</span>
+          <h2>Tu negocio tiene<br />mucho para compartir.</h2>
+          <p>Crea experiencias que convierten cada visita en una próxima razón para volver.</p>
+        </div>
+        <div class="showcase-quote"><img src="./assets/favicon.svg" alt="" /><p>“La lealtad se construye con cada pequeño detalle.”</p></div>
+        <span class="showcase-decoration" aria-hidden="true"></span>
+      </aside>
+    </main>
+
+    <main class="connection-screen" id="connection-screen" hidden>
+      <a class="auth-brand" href="#landing-top" data-public-home aria-label="Fidegresa, información">
+        <img src="./assets/favicon.svg" alt="" />
+        <span>Fidegresa<small>Fideliza y regresa</small></span>
+      </a>
+      <div class="connection-content">
+        <span class="error-illustration"><svg viewBox="0 0 120 120" fill="none" aria-hidden="true"><circle cx="60" cy="60" r="52" fill="#f1e6da"/><path d="M33 45h54v37a10 10 0 0 1-10 10H43a10 10 0 0 1-10-10V45Z" stroke="#603f2a" stroke-width="4"/><path d="M87 51h4a12 12 0 0 1 0 24h-4M43 34l8 8m0-8-8 8m23-8 8 8m0-8-8 8" stroke="#c8894f" stroke-width="4" stroke-linecap="round"/><path d="m53 63 14 14m0-14L53 77" stroke="#603f2a" stroke-width="4" stroke-linecap="round"/></svg></span>
+        <p class="error-code">ERROR 404</p>
+        <h1>Sin conexión</h1>
+        <p class="connection-description">No pudimos conectar con Fidegresa. Comprueba tu conexión e inténtalo nuevamente.</p>
+        <button class="auth-primary retry-button" type="button" data-action="retry-connection">Reintentar conexión</button>
+        <button class="link-button back-login" type="button" data-auth-screen="login">Volver al inicio de sesión</button>
+      </div>
+      <span class="auth-copyright">© 2026 Fidegresa</span>
+    </main>
+
+    <div class="app-shell" id="dashboard-screen" hidden>
       <aside class="sidebar" id="sidebar">
-        <a class="brand" href="#metricas" data-page="metricas" aria-label="Fidegresa, inicio">
+        <a class="brand" href="#landing-top" data-public-home aria-label="Fidegresa, información">
           <img class="brand-logo" src="./assets/favicon.svg" alt="" />
           <span class="brand-copy"><strong>Fidegresa</strong><small>Fideliza y regresa</small></span>
         </a>
@@ -42,6 +440,7 @@
           <button class="profile-mini" data-action="profile">
             <span class="avatar">MG</span><span><strong>María González</strong><small>Administradora</small></span><span class="profile-dots" data-icon="settings"></span>
           </button>
+          <button class="signout-button" data-action="logout"><span data-icon="logout"></span>Cerrar sesión</button>
         </div>
       </aside>
 

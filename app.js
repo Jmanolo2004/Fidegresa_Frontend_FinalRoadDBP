@@ -70,6 +70,16 @@ let toastTimer;
 const pageContent = document.querySelector("#page-content");
 const modal = document.querySelector("#app-modal");
 const modalForm = document.querySelector("#modal-form");
+const screenElements = {
+  loading: document.querySelector("#loading-screen"),
+  landing: document.querySelector("#landing-screen"),
+  terms: document.querySelector("#terms-screen"),
+  privacy: document.querySelector("#privacy-screen"),
+  login: document.querySelector("#login-screen"),
+  register: document.querySelector("#register-screen"),
+  connection: document.querySelector("#connection-screen"),
+  dashboard: document.querySelector("#dashboard-screen")
+};
 const iconPaths = {
   chart:"<path d='M3 3v18h18'/><path d='m19 9-5 5-4-4-5 5'/>",
   users:"<path d='M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/><circle cx='10' cy='7' r='4'/><path d='M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75'/>",
@@ -83,11 +93,50 @@ const iconPaths = {
   reward:"<path d='M12 8v13m0-13H7.5a2.5 2.5 0 1 1 2.5-2.5V8Zm0 0h4.5a2.5 2.5 0 1 0-2.5-2.5V8ZM4 12h16v9H4zM3 8h18v4H3z'/>",
   arrow:"<path d='M7 17 17 7M7 7h10v10'/>",
   close:"<path d='m18 6-12 12M6 6l12 12'/>",
-  menu:"<path d='M4 6h16M4 12h16M4 18h16'/>"
+  menu:"<path d='M4 6h16M4 12h16M4 18h16'/>",
+  logout:"<path d='M10 17l5-5-5-5m5 5H3'/><path d='M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6'/>"
 };
 
 function escapeHtml(value = "") {
   return String(value).replace(/[&<>"']/g, character => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[character]));
+}
+function renderAuthCards() {
+  const container=document.querySelector("#auth-cards");
+  const cards=[...data.tarjetas];
+  for(let index=cards.length-1;index>0;index--){
+    const swapIndex=Math.floor(Math.random()*(index+1));
+    [cards[index],cards[swapIndex]]=[cards[swapIndex],cards[index]];
+  }
+  container.innerHTML=cards.slice(0,3).map((card,index)=>`
+    <article class="showcase-card showcase-card-${index+1}${card.tipo==="Cashback"?" cashback":""}">
+      <span class="showcase-card-type">${escapeHtml(card.tipo)} · ${escapeHtml(card.negocio)}</span>
+      <strong>${escapeHtml(card.nombre)}</strong>
+      <span class="showcase-card-reward">${card.tipo==="Cashback"?`${Number(card.porcentaje)||0}% de vuelta`:`${Number(card.estampillas)||0} visitas para premiar`}</span>
+      <span class="showcase-card-bottom">${icon(card.tipo==="Cashback"?"reward":"star",16)} Beneficios que te hacen volver</span>
+    </article>`).join("");
+}
+function showScreen(name) {
+  const next=screenElements[name];
+  if(!next) throw new Error(`No existe la pantalla "${name}".`);
+  for(const [key,screen] of Object.entries(screenElements)) screen.hidden=key!==name;
+  if(name!=="loading") window.scrollTo(0,0);
+  if(name==="login") renderAuthCards();
+}
+function withLoading(nextScreen) {
+  showScreen("loading");
+  window.setTimeout(()=>showScreen(nextScreen),1000);
+}
+function startDemoSession(email) {
+  try {
+    sessionStorage.setItem("fidegresa-demo-session","active");
+    sessionStorage.setItem("fidegresa-demo-email",email);
+  } catch(error) {
+    console.error("No fue posible iniciar la sesión de demostración.",error);
+    showScreen("login");
+    showToast("El navegador no permitió iniciar la demostración.",true);
+    return;
+  }
+  withLoading("dashboard");
 }
 function initials(name = "") {
   return name.split(/\s+/).filter(Boolean).slice(0,2).map(word => word[0]).join("").toUpperCase();
@@ -105,9 +154,11 @@ function pageFromHash() {
 function saveData() {
   try {
     localStorage.setItem(storeKey, JSON.stringify(data));
+    return true;
   } catch (error) {
     console.error("No fue posible guardar los datos del panel.", error);
     showToast("No fue posible guardar los cambios en este navegador.", true);
+    return false;
   }
 }
 function showToast(message, isError = false) {
@@ -207,24 +258,204 @@ function goTo(page) {
 function openModal(title, subtitle, contents, submitLabel, onSubmit, wide = false) {
   modalForm.innerHTML=`<div class="modal-head"><div><h2>${title}</h2><p>${subtitle}</p></div><button type="button" class="modal-close" data-action="close-modal" aria-label="Cerrar">${icon("close",16)}</button></div>${contents}<div class="modal-actions"><button type="button" class="secondary-button" data-action="close-modal">Cancelar</button><button type="submit" class="primary-button" data-action="submit-modal">${submitLabel}</button></div>`;
   modalForm.dataset.wide=wide?"true":"false";
-  modalForm.onsubmit=event=>{event.preventDefault();onSubmit(new FormData(modalForm));};
+  modalForm.onsubmit=async event=>{event.preventDefault();await onSubmit(new FormData(modalForm));};
   modal.showModal();
+}
+function cardPreviewMarkup(card, renderIcon) {
+  const safeColor=value=>/^#[0-9a-f]{6}$/i.test(value||"")?value:"#603f2a";
+  const primary=safeColor(card.color);
+  const accent=safeColor(card.colorAcento);
+  const image=typeof card.imagen==="string"&&/^data:image\/(?:png|jpeg|webp);base64,/i.test(card.imagen)
+    ? `<img class="loyalty-artwork" src="${escapeHtml(card.imagen)}" alt="">`
+    : "";
+  const logo=image||`<span class="loyalty-monogram">${escapeHtml((card.negocio||"F").trim().slice(0,1).toUpperCase())}</span>`;
+  let reward="";
+  if(card.tipo==="Estampillas"){
+    const count=Math.max(2,Math.min(12,Number(card.estampillas)||10));
+    reward=card.mostrarProgreso?`<div class="loyalty-progress-stamps" aria-label="${count} espacios de visita">${Array.from({length:count},(_,index)=>`<span class="${index<Math.min(3,count)?"collected":""}">${index<Math.min(3,count)?renderIcon("star",12):""}</span>`).join("")}</div>`:"";
+  }else if(card.tipo==="Cashback"){
+    reward=card.mostrarProgreso?`<div class="loyalty-reward-value"><strong>${Number(card.porcentaje)||5}%</strong><span>cashback en compras</span></div>`:"";
+  }else if(card.tipo==="Niveles"){
+    const levelNames=["BRONCE","PLATA","ORO","DIAMANTE"];
+    const levels=Math.max(3,Math.min(4,Number(card.niveles)||3));
+    reward=card.mostrarProgreso?`<div class="loyalty-levels">${levelNames.slice(0,levels).map((level,index)=>`<span class="${index===Math.min(1,levels-1)?"current":""}"><i>${index+1}</i>${level}</span>`).join("")}</div>`:"";
+  }else if(card.tipo==="Giftcard"){
+    reward=card.mostrarProgreso?`<div class="loyalty-reward-value gift-balance"><strong>S/ ${Number(card.saldo)||100}</strong><span>saldo de regalo</span></div>`:"";
+  }
+  const code=card.mostrarQr?`<span class="loyalty-demo-code" aria-label="Código decorativo no escaneable"><i></i><b>DEMO</b></span>`:"";
+  return `<article class="loyalty-card-visual style-${escapeHtml(card.estilo||"elegante")}" style="--loyalty-primary:${primary};--loyalty-accent:${accent}">
+    ${image?`<div class="loyalty-artwork-wrap">${logo}</div>`:""}
+    <div class="loyalty-card-top">${image?`<span class="loyalty-brand-name">${escapeHtml(card.negocio||"Tu negocio")}</span>`:`${logo}<span class="loyalty-brand-name">${escapeHtml(card.negocio||"Tu negocio")}</span>`}<span class="loyalty-program-type">${escapeHtml(card.tipo||"Estampillas")}</span></div>
+    <div class="loyalty-card-copy"><h3>${escapeHtml(card.nombre||"Nombre de tu programa")}</h3><p>${escapeHtml(card.descripcion||"Tu beneficio aparecerá aquí")}</p></div>
+    ${reward}
+    <div class="loyalty-card-bottom"><span><small>BENEFICIO</small><strong>${escapeHtml(card.premio||card.descripcion||"Tu recompensa")}</strong></span>${code}</div>
+  </article>`;
 }
 function cardDialog(card) {
   const existing=Boolean(card);
-  const fields=`<div class="form-grid"><div class="form-field full"><label for="card-name">Nombre de la tarjeta</label><input id="card-name" class="form-control" name="nombre" required maxlength="50" value="${escapeHtml(card?.nombre||"")}" placeholder="Ej. Un café con cariño"></div><div class="form-field"><label for="card-type">Tipo de recompensa</label><select id="card-type" class="form-control" name="tipo"><option${card?.tipo==="Estampillas"||!card?" selected":""}>Estampillas</option><option${card?.tipo==="Cashback"?" selected":""}>Cashback</option></select></div><div class="form-field"><label for="card-location">Ubicación</label><select id="card-location" class="form-control" name="negocio">${data.ubicaciones.map(place=>`<option${card?.negocio===place.nombre?" selected":""}>${escapeHtml(place.nombre)}</option>`).join("")}</select></div><div class="form-field full"><label for="card-description">Descripción del beneficio</label><input id="card-description" class="form-control" name="descripcion" required maxlength="100" value="${escapeHtml(card?.descripcion||"")}" placeholder="Describe la recompensa para tus clientes"></div><div class="form-field" id="stamps-field"><label for="card-stamps">Estampillas para premiar</label><input id="card-stamps" class="form-control" name="estampillas" type="number" min="2" max="10" value="${card?.estampillas||10}"></div><div class="form-field" id="cashback-field"><label for="card-cashback">Porcentaje de cashback</label><input id="card-cashback" class="form-control" name="porcentaje" type="number" min="1" max="50" value="${card?.porcentaje||5}"></div></div>`;
-  openModal(existing?"Editar tarjeta":"Crear tarjeta de lealtad","Configura un beneficio sencillo para tus clientes",fields,existing?"Guardar cambios":"Crear tarjeta",formData=>{
-    const type=formData.get("tipo");
-    const updated={...card,nombre:String(formData.get("nombre")).trim(),tipo:type,negocio:String(formData.get("negocio")),descripcion:String(formData.get("descripcion")).trim(),estado:card?.estado||"Activa",clientes:card?.clientes||0};
+  const selectedType=card?.tipo||"Estampillas";
+  const color=card?.color||"#603f2a";
+  const accent=card?.colorAcento||"#c8894f";
+  const locationOptions=data.ubicaciones.map(place=>`<option value="${escapeHtml(place.nombre)}"${card?.negocio===place.nombre?" selected":""}>${escapeHtml(place.nombre)}</option>`).join("");
+  const fields=`<div class="card-designer">
+    <div class="card-designer-form">
+      <section class="designer-section"><div class="designer-section-title"><span>01</span><div><h3>Datos del programa</h3><p>Define qué verá tu cliente.</p></div></div>
+        <div class="form-grid">
+          <div class="form-field full"><label for="card-name">Nombre de la tarjeta</label><input id="card-name" class="form-control" name="nombre" required maxlength="50" value="${escapeHtml(card?.nombre||"")}" placeholder="Ej. Café de la Plaza"></div>
+          <div class="form-field"><label for="card-type">Tipo de programa</label><select id="card-type" class="form-control" name="tipo"><option${selectedType==="Estampillas"?" selected":""}>Estampillas</option><option${selectedType==="Cashback"?" selected":""}>Cashback</option><option${selectedType==="Niveles"?" selected":""}>Niveles</option><option${selectedType==="Giftcard"?" selected":""}>Giftcard</option></select></div>
+          <div class="form-field"><label for="card-location">Local asociado</label><select id="card-location" class="form-control" name="negocio" required>${locationOptions}</select></div>
+          <div class="form-field full"><label for="card-description">Mensaje de beneficio</label><input id="card-description" class="form-control" name="descripcion" required maxlength="100" value="${escapeHtml(card?.descripcion||"")}" placeholder="Ej. Tu décimo café va por nuestra cuenta"></div>
+          <div class="form-field card-type-field" data-card-field="estampillas"><label for="card-stamps">Visitas para obtener premio</label><input id="card-stamps" class="form-control" name="estampillas" type="number" min="2" max="12" value="${card?.estampillas||10}"></div>
+          <div class="form-field card-type-field" data-card-field="cashback"><label for="card-cashback">Cashback por compra (%)</label><input id="card-cashback" class="form-control" name="porcentaje" type="number" min="1" max="50" value="${card?.porcentaje||5}"></div>
+          <div class="form-field card-type-field" data-card-field="niveles"><label for="card-level-count">Niveles del programa</label><select id="card-level-count" class="form-control" name="niveles"><option value="3"${Number(card?.niveles||3)===3?" selected":""}>3 niveles</option><option value="4"${Number(card?.niveles)===4?" selected":""}>4 niveles</option></select></div>
+          <div class="form-field card-type-field" data-card-field="giftcard"><label for="card-balance">Saldo inicial (S/)</label><input id="card-balance" class="form-control" name="saldo" type="number" min="1" max="10000" value="${card?.saldo||100}"></div>
+          <div class="form-field full"><label for="card-reward">Premio o nivel destacado</label><input id="card-reward" class="form-control" name="premio" required maxlength="70" value="${escapeHtml(card?.premio||card?.descripcion||"")}" placeholder="Ej. Bebida gratis, nivel Oro o S/ 100 de saldo"></div>
+        </div>
+      </section>
+      <section class="designer-section"><div class="designer-section-title"><span>02</span><div><h3>Identidad visual</h3><p>Personaliza la imagen y los colores.</p></div></div>
+        <div class="form-grid">
+          <div class="form-field"><label for="card-color">Color principal</label><div class="color-control"><input id="card-color" name="color" type="color" value="${escapeHtml(color)}"><output for="card-color">${escapeHtml(color)}</output></div></div>
+          <div class="form-field"><label for="card-accent">Color de acento</label><div class="color-control"><input id="card-accent" name="colorAcento" type="color" value="${escapeHtml(accent)}"><output for="card-accent">${escapeHtml(accent)}</output></div></div>
+          <div class="form-field full"><label for="card-template">Estilo de tarjeta</label><select id="card-template" class="form-control" name="estilo"><option value="elegante"${card?.estilo==="elegante"||!card?" selected":""}>Elegante · degradado y contraste</option><option value="corporativo"${card?.estilo==="corporativo"?" selected":""}>Corporativo · limpio y estructurado</option><option value="vibrante"${card?.estilo==="vibrante"?" selected":""}>Vibrante · acento protagonista</option></select></div>
+          <div class="form-field full"><label for="card-image">Imagen o logotipo (opcional)</label><input id="card-image" class="form-control image-file-input" name="imagenArchivo" type="file" accept="image/png,image/jpeg,image/webp"><small class="field-hint">PNG, JPG o WebP · máximo 500 KB. La imagen se almacena solo en este navegador.</small><input name="imagenActual" type="hidden" value="${escapeHtml(card?.imagen||"")}"><button type="button" class="text-button image-remove"${card?.imagen?"":" hidden"}>Quitar imagen</button></div>
+        </div>
+      </section>
+      <section class="designer-section"><div class="designer-section-title"><span>03</span><div><h3>Elementos de la tarjeta</h3><p>Elige qué información mostrar.</p></div></div>
+        <div class="designer-toggles"><label><input type="checkbox" name="mostrarProgreso"${card?.mostrarProgreso!==false?" checked":""}><span><strong>Progreso o beneficios</strong><small>Estampillas, niveles o cashback</small></span></label><label><input type="checkbox" name="mostrarQr"${card?.mostrarQr!==false?" checked":""}><span><strong>Código de cliente</strong><small>Vista ilustrativa, no escaneable</small></span></label></div>
+      </section>
+    </div>
+    <aside class="card-preview-panel"><div class="card-preview-heading"><div><span class="preview-live-dot"></span> VISTA PREVIA</div><span>Frente de la tarjeta</span></div><div id="card-live-preview"></div><div class="preview-tip">${icon("star",15)} Los cambios se reflejan al instante.</div><p class="preview-disclaimer">Simulación de diseño. El código mostrado es decorativo y no permite escanear.</p></aside>
+  </div>`;
+  openModal(existing?"Diseñar tarjeta":"Crear programa de fidelización","Configura contenido, beneficios e identidad visual en un solo lugar.",fields,existing?"Guardar diseño":"Crear programa",async formData=>{
+    const type=String(formData.get("tipo"));
+    const file=formData.get("imagenArchivo");
+    let image=String(formData.get("imagenActual")||"");
+    if(file instanceof File&&file.size){
+      if(!["image/png","image/jpeg","image/webp"].includes(file.type)){
+        showToast("Elige una imagen PNG, JPG o WebP.",true);
+        return;
+      }
+      if(file.size>512000){
+        showToast("La imagen debe pesar 500 KB o menos.",true);
+        return;
+      }
+      try {
+        image=await new Promise((resolve,reject)=>{
+          const reader=new FileReader();
+          reader.onload=()=>typeof reader.result==="string"?resolve(reader.result):reject(new Error("El archivo de imagen no produjo un resultado válido."));
+          reader.onerror=()=>reject(reader.error||new Error("No se pudo leer la imagen seleccionada."));
+          reader.readAsDataURL(file);
+        });
+      } catch(error) {
+        console.error("No fue posible cargar la imagen de la tarjeta.",error);
+        showToast("No se pudo cargar la imagen seleccionada.",true);
+        return;
+      }
+    }
+    const updated={
+      ...card,
+      nombre:String(formData.get("nombre")).trim(),
+      tipo:type,
+      negocio:String(formData.get("negocio")),
+      descripcion:String(formData.get("descripcion")).trim(),
+      premio:String(formData.get("premio")).trim(),
+      color:String(formData.get("color")),
+      colorAcento:String(formData.get("colorAcento")),
+      estilo:String(formData.get("estilo")),
+      imagen:image,
+      mostrarProgreso:formData.has("mostrarProgreso"),
+      mostrarQr:formData.has("mostrarQr"),
+      estado:card?.estado||"Activa",
+      clientes:card?.clientes||0
+    };
     if(type==="Estampillas") updated.estampillas=Number(formData.get("estampillas"));
-    else updated.porcentaje=Number(formData.get("porcentaje"));
+    if(type==="Cashback") updated.porcentaje=Number(formData.get("porcentaje"));
+    if(type==="Niveles") updated.niveles=Number(formData.get("niveles"));
+    if(type==="Giftcard") updated.saldo=Number(formData.get("saldo"));
+    const previousCards=data.tarjetas;
     if(existing) data.tarjetas=data.tarjetas.map(item=>item.id===card.id?updated:item);
-    else data.tarjetas.unshift({...updated,id:Date.now()});
-    saveData();modal.close();render();showToast(existing?"Tarjeta actualizada.":"Tarjeta creada con éxito.");
-  });
+    else data.tarjetas=[{...updated,id:Date.now()},...data.tarjetas];
+    if(!saveData()){
+      data.tarjetas=previousCards;
+      return;
+    }
+    if(modal.open) modal.close();
+    render();
+    showToast(existing?"Diseño de tarjeta actualizado.":"Programa creado con éxito.");
+  },true);
   const type=document.querySelector("#card-type");
-  const updateFields=()=>{document.querySelector("#stamps-field").style.display=type.value==="Estampillas"?"grid":"none";document.querySelector("#cashback-field").style.display=type.value==="Cashback"?"grid":"none";};
-  type.addEventListener("change",updateFields);updateFields();
+  const updateTypeFields=()=>{
+    const fieldByType={Estampillas:"estampillas",Cashback:"cashback",Niveles:"niveles",Giftcard:"giftcard"};
+    for(const [typeName,fieldName] of Object.entries(fieldByType)){
+      const field=document.querySelector(`[data-card-field="${fieldName}"]`);
+      field.hidden=type.value!==typeName;
+      field.querySelector("input,select").disabled=field.hidden;
+    }
+    updateCardPreview();
+  };
+  type.addEventListener("change",updateTypeFields);
+  modalForm.oninput=event=>{
+    if(event.target.matches("#card-color,#card-accent")){
+      event.target.parentElement.querySelector("output").value=event.target.value.toUpperCase();
+    }
+    if(event.target.closest(".card-designer")) updateCardPreview();
+  };
+  modalForm.onchange=event=>{
+    if(event.target.matches("#card-image")){
+      const file=event.target.files?.[0];
+      if(file){
+        if(!["image/png","image/jpeg","image/webp"].includes(file.type)||file.size>512000){
+          showToast(file.size>512000?"La imagen debe pesar 500 KB o menos.":"Elige una imagen PNG, JPG o WebP.",true);
+          event.target.value="";
+          return;
+        }
+        const reader=new FileReader();
+        reader.onload=()=>{
+          if(typeof reader.result==="string"){
+            modalForm.elements.imagenActual.value=reader.result;
+            document.querySelector(".image-remove").hidden=false;
+            updateCardPreview();
+          }
+        };
+        reader.onerror=()=>showToast("No se pudo previsualizar la imagen seleccionada.",true);
+        reader.readAsDataURL(file);
+      }
+    }
+    if(event.target.closest(".card-designer")) updateCardPreview();
+  };
+  document.querySelector(".image-remove").addEventListener("click",()=>{
+    modalForm.elements.imagenActual.value="";
+    document.querySelector("#card-image").value="";
+    document.querySelector(".image-remove").hidden=true;
+    updateCardPreview();
+  });
+  updateTypeFields();
+  function updateCardPreview(){
+    const preview=document.querySelector("#card-live-preview");
+    if(!preview||!modal.open)return;
+    const value=name=>String(modalForm.elements.namedItem(name)?.value||"");
+    const safeColor=value("color").match(/^#[0-9a-f]{6}$/i)?value("color"):"#603f2a";
+    const safeAccent=value("colorAcento").match(/^#[0-9a-f]{6}$/i)?value("colorAcento"):"#c8894f";
+    const image=value("imagenActual");
+    const previewData={
+      nombre:value("nombre")||"Nombre de tu programa",
+      tipo:value("tipo"),
+      negocio:value("negocio"),
+      descripcion:value("descripcion")||"Tu beneficio aparecerá aquí",
+      premio:value("premio")||"Tu próxima recompensa",
+      estampillas:Number(value("estampillas"))||10,
+      porcentaje:Number(value("porcentaje"))||5,
+      niveles:Number(value("niveles"))||3,
+      saldo:Number(value("saldo"))||100,
+      color:safeColor,
+      colorAcento:safeAccent,
+      estilo:value("estilo"),
+      imagen:image,
+      mostrarProgreso:modalForm.elements.mostrarProgreso.checked,
+      mostrarQr:modalForm.elements.mostrarQr.checked
+    };
+    preview.innerHTML=cardPreviewMarkup(previewData,icon);
+  }
 }
 function locationDialog() {
   const form=`<div class="form-grid"><div class="form-field full"><label for="location-name">Nombre del negocio</label><input id="location-name" class="form-control" name="nombre" required maxlength="50" placeholder="Ej. Café de la Plaza"></div><div class="form-field"><label for="location-type">Tipo de negocio</label><select id="location-type" class="form-control" name="categoria"><option>Cafetería</option><option>Restaurante</option><option>Barbería</option><option>Repostería</option><option>Confitería</option><option>Otro</option></select></div><div class="form-field"><label for="location-address">Dirección</label><input id="location-address" class="form-control" name="direccion" required maxlength="100" placeholder="Calle y número"></div><div class="form-field full"><label for="location-hours">Horario de atención</label><input id="location-hours" class="form-control" name="horario" maxlength="60" placeholder="Lun – Sáb · 9:00 – 18:00"></div></div>`;
@@ -272,6 +503,22 @@ function loadSavedData() {
 }
 const actions = {
   menu: () => document.querySelector("#sidebar").classList.toggle("open"),
+  logout: () => {
+    try {
+      sessionStorage.removeItem("fidegresa-demo-session");
+      sessionStorage.removeItem("fidegresa-demo-email");
+    } catch(error) {
+      console.error("No fue posible cerrar la sesión de demostración.",error);
+      showToast("No fue posible cerrar la sesión.",true);
+      return;
+    }
+    document.querySelector("#login-password").value="";
+    showScreen("login");
+  },
+  "retry-connection": () => {
+    withLoading(navigator.onLine?"login":"connection");
+    if(navigator.onLine) window.setTimeout(()=>showToast("El modo de demostración no utiliza un servidor de conexión."),1000);
+  },
   "new-card": () => cardDialog(),
   "edit-card": button => {
     const card=data.tarjetas.find(item=>item.id===Number(button.dataset.id));
@@ -320,6 +567,25 @@ const actions = {
   "center-map": () => showToast("Mapa centrado en "+(data.ubicaciones.find(place=>place.id===Number(data.geolocalizacion.ubicacionId))?.nombre||"la ubicación seleccionada")+".")
 };
 document.addEventListener("click",event=>{
+  const legalLink=event.target.closest("[data-legal-screen]");
+  if(legalLink){
+    event.preventDefault();
+    const screen=legalLink.dataset.legalScreen;
+    history.pushState({fidegresaScreen:screen},"",legalLink.getAttribute("href"));
+    showScreen(screen);
+    return;
+  }
+  const publicHome=event.target.closest("[data-public-home]");
+  if(publicHome){
+    event.preventDefault();
+    if(screenElements.terms.hidden===false||screenElements.privacy.hidden===false){
+      history.pushState({fidegresaScreen:"landing"},"","#inicio");
+    }
+    showScreen("landing");
+    return;
+  }
+  const authButton=event.target.closest("[data-auth-screen]");
+  if(authButton){showScreen(authButton.dataset.authScreen);return;}
   const pageLink=event.target.closest("[data-page]");
   if(pageLink){event.preventDefault();goTo(pageLink.dataset.page);return;}
   const button=event.target.closest("[data-action]");
@@ -328,6 +594,41 @@ document.addEventListener("click",event=>{
   if(!action){console.error(`No existe la acción "${button.dataset.action}".`);return;}
   if(button.dataset.action==="submit-modal") event.preventDefault();
   action(button);
+});
+document.querySelector("#login-form").addEventListener("submit",event=>{
+  event.preventDefault();
+  const formData=new FormData(event.currentTarget);
+  const email=String(formData.get("email")).trim();
+  if(!email||!formData.get("password")) return;
+  startDemoSession(email);
+});
+document.querySelector("#register-form").addEventListener("submit",event=>{
+  event.preventDefault();
+  const formData=new FormData(event.currentTarget);
+  const business=String(formData.get("business")).trim();
+  const firstName=String(formData.get("firstName")).trim();
+  const lastName=String(formData.get("lastName")).trim();
+  const email=String(formData.get("email")).trim();
+  const password=String(formData.get("password"));
+  if(!business||!firstName||!lastName||!email||password.length<8) return;
+  data.configuracion.marca=business;
+  data.configuracion.perfilNombre=`${firstName} ${lastName}`;
+  data.configuracion.perfilCorreo=email;
+  if(!data.ubicaciones.some(place=>place.nombre.toLowerCase()===business.toLowerCase())){
+    data.ubicaciones.unshift({
+      id:Date.now(),
+      nombre:business,
+      categoria:String(formData.get("category")),
+      direccion:"Dirección pendiente",
+      horario:"Horario por definir",
+      clientes:0,
+      activa:true
+    });
+  }
+  saveData();
+  event.currentTarget.reset();
+  render();
+  startDemoSession(email);
 });
 document.addEventListener("input",event=>{
   if(event.target.id==="client-search"){searchTerm=event.target.value;refreshLive();}
@@ -340,10 +641,23 @@ document.addEventListener("change",event=>{
   if(event.target.id==="metric-select"){selectedMetric=event.target.value;refreshLive();}
   if(event.target.id==="geo-location"){data.geolocalizacion.ubicacionId=Number(event.target.value);saveData();render();}
 });
-window.addEventListener("popstate",()=>{currentPage=pageFromHash();render();});
+window.addEventListener("popstate",()=>{
+  if(location.hash==="#terminos"){showScreen("terms");return;}
+  if(location.hash==="#privacidad"){showScreen("privacy");return;}
+  if(screenElements.terms.hidden===false||screenElements.privacy.hidden===false){
+    showScreen("landing");
+    if(location.hash) document.querySelector(location.hash)?.scrollIntoView();
+    return;
+  }
+  currentPage=pageFromHash();
+  render();
+});
 document.querySelector("#today-label").textContent=new Intl.DateTimeFormat(locale,{weekday:"short",day:"numeric",month:"short",year:"numeric"}).format(new Date());
 document.querySelector(".footer span").textContent=`© ${new Date().getFullYear()} Fidegresa`;
 document.querySelector(".footer b").innerHTML=icon("star",12);
 loadSavedData();
 currentPage=pageFromHash();
 render();
+const existingDemoSession=sessionStorage.getItem("fidegresa-demo-session")==="active";
+const legalScreenFromHash=location.hash==="#terminos"?"terms":location.hash==="#privacidad"?"privacy":null;
+window.setTimeout(()=>showScreen(legalScreenFromHash||(existingDemoSession?"dashboard":"login")),1000);
