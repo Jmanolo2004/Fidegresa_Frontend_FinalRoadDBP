@@ -1,50 +1,4 @@
-const seedData = {
-  metricas: {
-    ingresos: 28450,
-    ingresosCambio: 12.8,
-    clientesActivos: 1248,
-    clientesCambio: 8.2,
-    recompensas: 386,
-    recompensasCambio: 16.4,
-    visitas: 3420,
-    visitasCambio: 6.7,
-    ventasMensuales: [18, 25, 22, 33, 29, 42, 37, 50, 44, 61, 54, 72],
-    categorias: [{nombre:"Cafeterías",valor:42},{nombre:"Restaurantes",valor:28},{nombre:"Reposterías",valor:17},{nombre:"Otros",valor:13}]
-  },
-  clientes: [
-    {id:1,nombre:"Lucía Martínez",correo:"lucia.martinez@email.com",tarjeta:"Café de la Plaza",distrito:"Miraflores",mapX:430,mapY:345,estado:"Activa",visitas:18,ultimaVisita:"Hoy",iniciales:"LM"},
-    {id:2,nombre:"Mateo Fernández",correo:"mateo.fernandez@email.com",tarjeta:"Dulce Encuentro",distrito:"Miraflores",mapX:475,mapY:270,estado:"Activa",visitas:12,ultimaVisita:"Ayer",iniciales:"MF"},
-    {id:3,nombre:"Valentina Rojas",correo:"valentina.rojas@email.com",tarjeta:"Barbería Norte",distrito:"San Isidro",mapX:555,mapY:255,estado:"Activa",visitas:9,ultimaVisita:"12 oct 2025",iniciales:"VR"},
-    {id:4,nombre:"Santiago Pérez",correo:"santiago.perez@email.com",tarjeta:"Café de la Plaza",distrito:"Miraflores",mapX:350,mapY:415,estado:"Inactiva",visitas:3,ultimaVisita:"18 sep 2025",iniciales:"SP"},
-    {id:5,nombre:"Camila Torres",correo:"camila.torres@email.com",tarjeta:"La Mesa Alegre",distrito:"San Borja",mapX:515,mapY:430,estado:"Activa",visitas:15,ultimaVisita:"Ayer",iniciales:"CT"},
-    {id:6,nombre:"Daniela Castillo",correo:"daniela.castillo@email.com",tarjeta:"Dulce Encuentro",distrito:"Surco",mapX:765,mapY:535,estado:"Activa",visitas:7,ultimaVisita:"10 oct 2025",iniciales:"DC"},
-    {id:7,nombre:"Andrés Vega",correo:"andres.vega@email.com",tarjeta:"Barbería Norte",distrito:"Barranco",mapX:285,mapY:570,estado:"Inactiva",visitas:2,ultimaVisita:"2 ago 2025",iniciales:"AV"},
-    {id:8,nombre:"Isabella Cruz",correo:"isabella.cruz@email.com",tarjeta:"Café de la Plaza",distrito:"San Isidro",mapX:665,mapY:205,estado:"Activa",visitas:21,ultimaVisita:"Hoy",iniciales:"IC"}
-  ],
-  tarjetas: [
-    {id:1,nombre:"Un café con cariño",tipo:"Estampillas",negocio:"Café de la Plaza",descripcion:"Disfruta tu décimo café por cuenta de la casa.",estampillas:10,clientes:324,estado:"Activa"},
-    {id:2,nombre:"Dulce recompensa",tipo:"Cashback",negocio:"Dulce Encuentro",descripcion:"Acumula un 5% de vuelta en cada compra.",porcentaje:5,clientes:216,estado:"Activa"},
-    {id:3,nombre:"Cortes que premian",tipo:"Estampillas",negocio:"Barbería Norte",descripcion:"Tu sexto corte tiene un 50% de descuento.",estampillas:6,clientes:148,estado:"Activa"},
-    {id:4,nombre:"La Mesa te premia",tipo:"Cashback",negocio:"La Mesa Alegre",descripcion:"Recibe un 3% de cashback en tus visitas.",porcentaje:3,clientes:179,estado:"Activa"}
-  ],
-  ubicaciones: [
-    {id:1,nombre:"Café de la Plaza",categoria:"Cafetería",direccion:"Miraflores, Lima, Perú",distrito:"Miraflores",mapX:410,mapY:325,horario:"Lun – Dom · 7:00 – 20:00",clientes:324,activa:true},
-    {id:2,nombre:"Dulce Encuentro",categoria:"Repostería",direccion:"Santiago de Surco, Lima, Perú",distrito:"Surco",mapX:735,mapY:535,horario:"Mar – Dom · 9:00 – 19:00",clientes:216,activa:true},
-    {id:3,nombre:"Barbería Norte",categoria:"Barbería",direccion:"San Isidro, Lima, Perú",distrito:"San Isidro",mapX:625,mapY:245,horario:"Lun – Sáb · 10:00 – 21:00",clientes:148,activa:true},
-    {id:4,nombre:"La Mesa Alegre",categoria:"Restaurante",direccion:"Barranco, Lima, Perú",distrito:"Barranco",mapX:300,mapY:555,horario:"Lun – Dom · 13:00 – 23:00",clientes:179,activa:false},
-    {id:5,nombre:"Confitería Nube",categoria:"Confitería",direccion:"San Borja, Lima, Perú",distrito:"San Borja",mapX:585,mapY:455,horario:"Lun – Sáb · 8:30 – 18:30",clientes:92,activa:true}
-  ],
-  resenas: [
-    {id:1,nombre:"Lucía Martínez",iniciales:"LM",negocio:"Café de la Plaza",fecha:"14 oct 2025",calificacion:5,comentario:"La tarjeta es muy fácil de usar. Siempre veo cuántos cafés me faltan y ya canjeé uno gratis sin complicaciones.",sentimiento:"Positiva"},
-    {id:2,nombre:"Mateo Fernández",iniciales:"MF",negocio:"Dulce Encuentro",fecha:"12 oct 2025",calificacion:4,comentario:"Me gusta recibir cashback en cada compra. Sería útil poder ver un resumen de mis recompensas del mes.",sentimiento:"Positiva"},
-    {id:3,nombre:"Valentina Rojas",iniciales:"VR",negocio:"Barbería Norte",fecha:"10 oct 2025",calificacion:3,comentario:"La idea funciona bien, aunque al principio no entendía cuándo se registraba mi visita. El equipo me explicó cómo hacerlo.",sentimiento:"Neutral"},
-    {id:4,nombre:"Camila Torres",iniciales:"CT",negocio:"La Mesa Alegre",fecha:"8 oct 2025",calificacion:5,comentario:"El programa es claro y el personal registra mis puntos rápidamente. Me anima a volver con mis amigas.",sentimiento:"Positiva"},
-    {id:5,nombre:"Andrés Vega",iniciales:"AV",negocio:"Barbería Norte",fecha:"5 oct 2025",calificacion:2,comentario:"Mi visita tardó en aparecer en la tarjeta y tuve que consultar en el local. Sería mejor recibir una confirmación inmediata.",sentimiento:"Por mejorar"}
-  ],
-  geolocalizacion: {radio:500,ubicacionId:1},
-  audiencias: [],
-  configuracion: {marca:"Fidegresa",perfilNombre:"María González",perfilCorreo:"maria@fidegresa.com",tema:"claro"}
-};
+const seedData = window.fidegresaDemoData;
 
 const pageTitles = {
   metricas:"Métricas",
@@ -217,10 +171,20 @@ function getReachData() {
   const location=data.ubicaciones.find(place=>Number(place.id)===Number(geo.ubicacionId))||data.ubicaciones[0];
   const nearby=data.clientes.map(person=>({
     ...person,
-    distance:Math.round(Math.hypot(Number(person.mapX)-Number(location?.mapX||0),Number(person.mapY)-Number(location?.mapY||0))*mapMetersPerUnit)
+    distance:distanceBetween(person.latitud,person.longitud,location?.latitud,location?.longitud)
   })).sort((first,second)=>first.distance-second.distance);
   const inRange=nearby.filter(person=>person.distance<=Number(geo.radio));
   return {location,nearby,inRange,outOfRange:nearby.filter(person=>person.distance>Number(geo.radio))};
+}
+function distanceBetween(latitudeA,longitudeA,latitudeB,longitudeB) {
+  const radians=degrees=>degrees*Math.PI/180;
+  const lat1=radians(Number(latitudeA)||0);
+  const lat2=radians(Number(latitudeB)||0);
+  const latitudeDelta=lat2-lat1;
+  const longitudeDelta=radians((Number(longitudeB)||0)-(Number(longitudeA)||0));
+  const haversine=Math.sin(latitudeDelta/2)**2+Math.cos(lat1)*Math.cos(lat2)*Math.sin(longitudeDelta/2)**2;
+  const meters=6371000*2*Math.atan2(Math.sqrt(haversine),Math.sqrt(1-haversine));
+  return Math.max(50,Math.round(meters/10)*10);
 }
 function kpi(label, value, change, explanation, iconName = "chart") {
   const variation = change !== null && change !== undefined && Number.isFinite(Number(change))
@@ -235,16 +199,12 @@ function changeOf(series) {
   return Number((((current - previous) / previous) * 100).toFixed(1));
 }
 function monthlySeries(metricName = "ventas") {
-  const source = data.metricas.ventasMensuales;
-  const shape = metricName === "visitas"
-    ? source.map((value, index) => value * (0.68 + (index % 4) * 0.09))
-    : source;
-  const total = metricName === "visitas" ? data.metricas.visitas : data.metricas.ingresos;
-  const scale = total / shape.at(-1);
-  const month = new Date();
-  return shape.map((value, index) => {
-    const date = new Date(month.getFullYear(), month.getMonth() - (shape.length - index - 1), 1);
-    return { label: new Intl.DateTimeFormat(locale, {month:"short", year:"numeric"}).format(date), value: Math.round(value * scale) };
+  return data.metricas.mensual.map(month=>{
+    const label=new Intl.DateTimeFormat(locale,{month:"short",year:"numeric"}).format(new Date(month.fecha));
+    return {
+      label:label.charAt(0).toLocaleUpperCase(locale)+label.slice(1).replace(".",""),
+      value:metricName==="visitas"?month.visitas:month.ventas
+    };
   });
 }
 function customerTable(customers) {
@@ -567,10 +527,23 @@ function confirmInModal(title, description, submitLabel, onConfirm) {
 function loadSavedData() {
   try {
     const saved=localStorage.getItem(storeKey);
-    if(saved) data={...data,...JSON.parse(saved)};
+    if(saved){
+      const parsed=JSON.parse(saved);
+      const hasCurrentShape=parsed?.schemaVersion===2
+        &&Array.isArray(parsed.clientes)&&parsed.clientes.length>=24&&parsed.clientes.length<=40
+        &&Array.isArray(parsed.visitas)&&Array.isArray(parsed.ubicaciones)&&Array.isArray(parsed.tarjetas);
+      if(hasCurrentShape){
+        data={...data,...parsed,configuracion:{...seedData.configuracion,...parsed.configuracion}};
+      }else{
+        data=structuredClone(seedData);
+        saveData();
+      }
+    }
   } catch(error) {
     console.error("Los datos guardados del panel no se pudieron leer.",error);
-    showToast("No fue posible leer los datos guardados.",true);
+    data=structuredClone(seedData);
+    saveData();
+    showToast("Los datos anteriores no se pudieron migrar. Se cargaron datos de demostración nuevos.",true);
   }
   ensureMapData();
 }
