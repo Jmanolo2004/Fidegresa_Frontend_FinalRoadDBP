@@ -160,6 +160,12 @@ function pageHeader(title, summary, action = "") {
 function mapPositionFor(district) {
   return mapDistricts[district]||mapDistricts.Miraflores;
 }
+function updateLocationCoordinates(location) {
+  const origin=mapPositionFor(location.distrito);
+  const longitudeScale=111320*Math.cos(origin.latitud*Math.PI/180);
+  location.latitud=origin.latitud+(origin.y-location.mapY)*mapMetersPerUnit/111320;
+  location.longitud=origin.longitud+(location.mapX-origin.x)*mapMetersPerUnit/longitudeScale;
+}
 function ensureMapData() {
   if(!Array.isArray(data.audiencias)) data.audiencias=[];
   data.ubicaciones.forEach((place,index)=>{
@@ -860,6 +866,7 @@ const actions = {
     const position=mapPositionFor(location.distrito);
     location.mapX=position.x;
     location.mapY=position.y;
+    updateLocationCoordinates(location);
     saveData();
     syncGeoMap();
     refreshLive();
@@ -923,6 +930,7 @@ function updateDraggedMapMarker(event) {
   if(!location) return;
   location.mapX=Math.max(45,Math.min(955,Math.round(point.x)));
   location.mapY=Math.max(45,Math.min(655,Math.round(point.y)));
+  updateLocationCoordinates(location);
   syncGeoMap();
   refreshLive();
 }
@@ -970,6 +978,7 @@ document.addEventListener("keydown",event=>{
   if(!location) return;
   location.mapX=Math.max(45,Math.min(955,location.mapX+delta[0]));
   location.mapY=Math.max(45,Math.min(655,location.mapY+delta[1]));
+  updateLocationCoordinates(location);
   saveData();
   syncGeoMap();
   refreshLive();
