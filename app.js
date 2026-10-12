@@ -702,10 +702,17 @@ function createAudienceDialog() {
 }
 function profileDialog() {
   const profile=data.configuracion;
-  const form=`<div class="form-grid"><div class="form-field full"><label for="profile-name">Nombre</label><input id="profile-name" class="form-control" name="nombre" required maxlength="60" value="${escapeHtml(profile.perfilNombre)}"></div><div class="form-field full"><label for="profile-email">Correo electrónico</label><input id="profile-email" class="form-control" name="correo" type="email" required maxlength="100" value="${escapeHtml(profile.perfilCorreo)}"></div></div>`;
+  const form=`<div class="form-grid"><div class="form-field full"><label for="profile-name">Nombre</label><input id="profile-name" class="form-control" name="nombre" required maxlength="60" value="${escapeHtml(profile.perfilNombre)}"></div><div class="form-field full"><label for="profile-email">Correo electrónico</label><input id="profile-email" class="form-control" name="correo" type="email" required maxlength="100" value="${escapeHtml(profile.perfilCorreo)}"></div><div class="form-field full"><label for="profile-phone">Teléfono</label><input id="profile-phone" class="form-control" name="telefono" type="tel" autocomplete="tel" maxlength="20" value="${escapeHtml(profile.perfilTelefono||"")}" placeholder="Ej. 999 123 456"></div></div>`;
   openModal("Mi perfil","Actualiza los datos de tu cuenta administradora",form,"Guardar perfil",formData=>{
-    profile.perfilNombre=String(formData.get("nombre")).trim();profile.perfilCorreo=String(formData.get("correo")).trim();
-    saveData();modal.close();render();showToast("Perfil actualizado.");
+    const previous={nombre:profile.perfilNombre,correo:profile.perfilCorreo,telefono:profile.perfilTelefono};
+    profile.perfilNombre=String(formData.get("nombre")||"").trim();
+    profile.perfilCorreo=String(formData.get("correo")||"").trim();
+    profile.perfilTelefono=String(formData.get("telefono")||"").trim();
+    if(!saveData()){
+      profile.perfilNombre=previous.nombre;profile.perfilCorreo=previous.correo;profile.perfilTelefono=previous.telefono;
+      return;
+    }
+    modal.close();render();showToast("Perfil actualizado.");
   });
 }
 function exportClients() {
@@ -836,16 +843,55 @@ const actions = {
   "edit-brand": () => {
     const content=`<div class="form-field"><label for="brand-name-input">Nombre del programa</label><input id="brand-name-input" class="form-control" name="nombre" required maxlength="50" value="${escapeHtml(data.configuracion.marca)}"></div>`;
     openModal("Nombre del programa","Actualiza el nombre que aparece en tus tarjetas.",content,"Guardar",formData=>{
-      data.configuracion.marca=String(formData.get("nombre")).trim();
-      saveData();modal.close();render();showToast("Nombre del programa actualizado.");
+      const previous=data.configuracion.marca;
+      const nombre=String(formData.get("nombre")||"").trim();
+      if(!nombre){
+        showToast("Escribe el nombre del programa.",true);
+        return;
+      }
+      data.configuracion.marca=nombre;
+      if(!saveData()){
+        data.configuracion.marca=previous;
+        return;
+      }
+      modal.close();render();showToast("Nombre del programa actualizado.");
     });
   },
-  theme: button => {data.configuracion.tema=button.dataset.theme;saveData();render();showToast("Tema actualizado.");},
+  theme: button => {
+    const previous=data.configuracion.tema;
+    data.configuracion.tema=button.dataset.theme;
+    if(!saveData()){
+      data.configuracion.tema=previous;
+      return;
+    }
+    render();showToast("Tema actualizado.");
+  },
+  "toggle-notice-preference": button => {
+    const key=button.dataset.preference;
+    if(!Object.hasOwn(seedData.configuracion.avisos,key)){
+      showToast("No reconocemos esta preferencia de avisos.",true);
+      return;
+    }
+    data.configuracion.avisos??={...seedData.configuracion.avisos};
+    const previous=data.configuracion.avisos[key]!==false;
+    data.configuracion.avisos[key]=!previous;
+    if(!saveData()){
+      data.configuracion.avisos[key]=previous;
+      return;
+    }
+    render();
+    const labels={inactivos:"clientes inactivos",localesEnPausa:"locales en pausa",resenas:"reseñas pendientes",cumpleanos:"cumpleaños próximos"};
+    showToast(`Avisos para ${labels[key]} ${previous?"desactivados":"activados"}.`);
+  },
   "reset-data": () => confirmInModal("Restablecer datos","Se reemplazarán tus cambios por los datos originales de demostración.","Restablecer",()=>{
     try {
-      localStorage.removeItem(storeKey);
+      const previous=data;
       data=structuredClone(seedData);
-      saveData();modal.close();render();showToast("Datos de demostración restablecidos.");
+      if(!saveData()){
+        data=previous;
+        return;
+      }
+      modal.close();render();showToast("Datos de demostración restablecidos.");
     } catch(error) {
       console.error("No fue posible restablecer los datos locales.",error);
       showToast("No fue posible restablecer los datos.",true);
