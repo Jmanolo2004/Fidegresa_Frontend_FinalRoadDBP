@@ -12,14 +12,14 @@ const seedData = {
     categorias: [{nombre:"Cafeterías",valor:42},{nombre:"Restaurantes",valor:28},{nombre:"Reposterías",valor:17},{nombre:"Otros",valor:13}]
   },
   clientes: [
-    {id:1,nombre:"Lucía Martínez",correo:"lucia.martinez@email.com",tarjeta:"Café de la Plaza",estado:"Activa",visitas:18,ultimaVisita:"Hoy",iniciales:"LM",lat:-0.002},
-    {id:2,nombre:"Mateo Fernández",correo:"mateo.fernandez@email.com",tarjeta:"Dulce Encuentro",estado:"Activa",visitas:12,ultimaVisita:"Ayer",iniciales:"MF",lat:0.003},
-    {id:3,nombre:"Valentina Rojas",correo:"valentina.rojas@email.com",tarjeta:"Barbería Norte",estado:"Activa",visitas:9,ultimaVisita:"12 oct 2025",iniciales:"VR",lat:-0.004},
-    {id:4,nombre:"Santiago Pérez",correo:"santiago.perez@email.com",tarjeta:"Café de la Plaza",estado:"Inactiva",visitas:3,ultimaVisita:"18 sep 2025",iniciales:"SP",lat:0.006},
-    {id:5,nombre:"Camila Torres",correo:"camila.torres@email.com",tarjeta:"La Mesa Alegre",estado:"Activa",visitas:15,ultimaVisita:"Ayer",iniciales:"CT",lat:-0.007},
-    {id:6,nombre:"Daniela Castillo",correo:"daniela.castillo@email.com",tarjeta:"Dulce Encuentro",estado:"Activa",visitas:7,ultimaVisita:"10 oct 2025",iniciales:"DC",lat:0.009},
-    {id:7,nombre:"Andrés Vega",correo:"andres.vega@email.com",tarjeta:"Barbería Norte",estado:"Inactiva",visitas:2,ultimaVisita:"2 ago 2025",iniciales:"AV",lat:-0.011},
-    {id:8,nombre:"Isabella Cruz",correo:"isabella.cruz@email.com",tarjeta:"Café de la Plaza",estado:"Activa",visitas:21,ultimaVisita:"Hoy",iniciales:"IC",lat:0.013}
+    {id:1,nombre:"Lucía Martínez",correo:"lucia.martinez@email.com",tarjeta:"Café de la Plaza",distrito:"Miraflores",mapX:430,mapY:345,estado:"Activa",visitas:18,ultimaVisita:"Hoy",iniciales:"LM"},
+    {id:2,nombre:"Mateo Fernández",correo:"mateo.fernandez@email.com",tarjeta:"Dulce Encuentro",distrito:"Miraflores",mapX:475,mapY:270,estado:"Activa",visitas:12,ultimaVisita:"Ayer",iniciales:"MF"},
+    {id:3,nombre:"Valentina Rojas",correo:"valentina.rojas@email.com",tarjeta:"Barbería Norte",distrito:"San Isidro",mapX:555,mapY:255,estado:"Activa",visitas:9,ultimaVisita:"12 oct 2025",iniciales:"VR"},
+    {id:4,nombre:"Santiago Pérez",correo:"santiago.perez@email.com",tarjeta:"Café de la Plaza",distrito:"Miraflores",mapX:350,mapY:415,estado:"Inactiva",visitas:3,ultimaVisita:"18 sep 2025",iniciales:"SP"},
+    {id:5,nombre:"Camila Torres",correo:"camila.torres@email.com",tarjeta:"La Mesa Alegre",distrito:"San Borja",mapX:515,mapY:430,estado:"Activa",visitas:15,ultimaVisita:"Ayer",iniciales:"CT"},
+    {id:6,nombre:"Daniela Castillo",correo:"daniela.castillo@email.com",tarjeta:"Dulce Encuentro",distrito:"Surco",mapX:765,mapY:535,estado:"Activa",visitas:7,ultimaVisita:"10 oct 2025",iniciales:"DC"},
+    {id:7,nombre:"Andrés Vega",correo:"andres.vega@email.com",tarjeta:"Barbería Norte",distrito:"Barranco",mapX:285,mapY:570,estado:"Inactiva",visitas:2,ultimaVisita:"2 ago 2025",iniciales:"AV"},
+    {id:8,nombre:"Isabella Cruz",correo:"isabella.cruz@email.com",tarjeta:"Café de la Plaza",distrito:"San Isidro",mapX:665,mapY:205,estado:"Activa",visitas:21,ultimaVisita:"Hoy",iniciales:"IC"}
   ],
   tarjetas: [
     {id:1,nombre:"Un café con cariño",tipo:"Estampillas",negocio:"Café de la Plaza",descripcion:"Disfruta tu décimo café por cuenta de la casa.",estampillas:10,clientes:324,estado:"Activa"},
@@ -28,11 +28,11 @@ const seedData = {
     {id:4,nombre:"La Mesa te premia",tipo:"Cashback",negocio:"La Mesa Alegre",descripcion:"Recibe un 3% de cashback en tus visitas.",porcentaje:3,clientes:179,estado:"Activa"}
   ],
   ubicaciones: [
-    {id:1,nombre:"Café de la Plaza",categoria:"Cafetería",direccion:"Av. de los Cafetales 245, Centro",horario:"Lun – Dom · 7:00 – 20:00",clientes:324,activa:true},
-    {id:2,nombre:"Dulce Encuentro",categoria:"Repostería",direccion:"Calle Magnolia 82, San Miguel",horario:"Mar – Dom · 9:00 – 19:00",clientes:216,activa:true},
-    {id:3,nombre:"Barbería Norte",categoria:"Barbería",direccion:"Blvd. de la Estación 510, Norte",horario:"Lun – Sáb · 10:00 – 21:00",clientes:148,activa:true},
-    {id:4,nombre:"La Mesa Alegre",categoria:"Restaurante",direccion:"Paseo del Bosque 34, Jardines",horario:"Lun – Dom · 13:00 – 23:00",clientes:179,activa:false},
-    {id:5,nombre:"Confitería Nube",categoria:"Confitería",direccion:"Calle de las Flores 117, Centro",horario:"Lun – Sáb · 8:30 – 18:30",clientes:92,activa:true}
+    {id:1,nombre:"Café de la Plaza",categoria:"Cafetería",direccion:"Miraflores, Lima, Perú",distrito:"Miraflores",mapX:410,mapY:325,horario:"Lun – Dom · 7:00 – 20:00",clientes:324,activa:true},
+    {id:2,nombre:"Dulce Encuentro",categoria:"Repostería",direccion:"Santiago de Surco, Lima, Perú",distrito:"Surco",mapX:735,mapY:535,horario:"Mar – Dom · 9:00 – 19:00",clientes:216,activa:true},
+    {id:3,nombre:"Barbería Norte",categoria:"Barbería",direccion:"San Isidro, Lima, Perú",distrito:"San Isidro",mapX:625,mapY:245,horario:"Lun – Sáb · 10:00 – 21:00",clientes:148,activa:true},
+    {id:4,nombre:"La Mesa Alegre",categoria:"Restaurante",direccion:"Barranco, Lima, Perú",distrito:"Barranco",mapX:300,mapY:555,horario:"Lun – Dom · 13:00 – 23:00",clientes:179,activa:false},
+    {id:5,nombre:"Confitería Nube",categoria:"Confitería",direccion:"San Borja, Lima, Perú",distrito:"San Borja",mapX:585,mapY:455,horario:"Lun – Sáb · 8:30 – 18:30",clientes:92,activa:true}
   ],
   resenas: [
     {id:1,nombre:"Lucía Martínez",iniciales:"LM",negocio:"Café de la Plaza",fecha:"14 oct 2025",calificacion:5,comentario:"La tarjeta es muy fácil de usar. Siempre veo cuántos cafés me faltan y ya canjeé uno gratis sin complicaciones.",sentimiento:"Positiva"},
@@ -42,6 +42,7 @@ const seedData = {
     {id:5,nombre:"Andrés Vega",iniciales:"AV",negocio:"Barbería Norte",fecha:"5 oct 2025",calificacion:2,comentario:"Mi visita tardó en aparecer en la tarjeta y tuve que consultar en el local. Sería mejor recibir una confirmación inmediata.",sentimiento:"Por mejorar"}
   ],
   geolocalizacion: {radio:500,ubicacionId:1},
+  audiencias: [],
   configuracion: {marca:"Fidegresa",perfilNombre:"María González",perfilCorreo:"maria@fidegresa.com",tema:"claro"}
 };
 
@@ -66,6 +67,15 @@ let cardFilter = "Todas";
 let reviewFilter = "Todas";
 let selectedMetric = "ventas";
 let toastTimer;
+let activeMapDrag = null;
+const mapMetersPerUnit = 2.5;
+const mapDistricts = {
+  Barranco:{x:300,y:555},
+  Miraflores:{x:410,y:325},
+  "San Isidro":{x:625,y:245},
+  "San Borja":{x:585,y:455},
+  Surco:{x:735,y:535}
+};
 
 const pageContent = document.querySelector("#page-content");
 const modal = document.querySelector("#app-modal");
@@ -178,6 +188,40 @@ function icon(name, size = 18) {
 function pageHeader(title, summary, action = "") {
   return `<div class="page-heading"><div><p class="eyebrow">Fidegresa · Tu comunidad</p><h1>${title}</h1><p data-live="page-summary">${summary}</p></div>${action}</div>`;
 }
+function mapPositionFor(district) {
+  return mapDistricts[district]||mapDistricts.Miraflores;
+}
+function ensureMapData() {
+  if(!Array.isArray(data.audiencias)) data.audiencias=[];
+  data.ubicaciones.forEach((place,index)=>{
+    const district=Object.hasOwn(mapDistricts,place.distrito)?place.distrito:Object.keys(mapDistricts)[index%Object.keys(mapDistricts).length];
+    place.distrito=district;
+    const position=mapPositionFor(district);
+    if(!Number.isFinite(Number(place.mapX))) place.mapX=position.x;
+    if(!Number.isFinite(Number(place.mapY))) place.mapY=position.y;
+  });
+  data.clientes.forEach((person,index)=>{
+    const associatedLocation=data.ubicaciones.find(place=>place.nombre===person.tarjeta)||data.ubicaciones[index%Math.max(1,data.ubicaciones.length)];
+    const district=Object.hasOwn(mapDistricts,person.distrito)?person.distrito:associatedLocation?.distrito||Object.keys(mapDistricts)[index%Object.keys(mapDistricts).length];
+    person.distrito=district;
+    if(!Number.isFinite(Number(person.mapX))||!Number.isFinite(Number(person.mapY))){
+      const center=mapPositionFor(district);
+      const offset=((Number(person.id)||index+1)*47)%151-75;
+      person.mapX=center.x+offset;
+      person.mapY=center.y-offset*.62;
+    }
+  });
+}
+function getReachData() {
+  const geo=data.geolocalizacion;
+  const location=data.ubicaciones.find(place=>Number(place.id)===Number(geo.ubicacionId))||data.ubicaciones[0];
+  const nearby=data.clientes.map(person=>({
+    ...person,
+    distance:Math.round(Math.hypot(Number(person.mapX)-Number(location?.mapX||0),Number(person.mapY)-Number(location?.mapY||0))*mapMetersPerUnit)
+  })).sort((first,second)=>first.distance-second.distance);
+  const inRange=nearby.filter(person=>person.distance<=Number(geo.radio));
+  return {location,nearby,inRange,outOfRange:nearby.filter(person=>person.distance>Number(geo.radio))};
+}
 function kpi(label, value, change, explanation, iconName = "chart") {
   const variation = change !== null && change !== undefined && Number.isFinite(Number(change))
     ? `<span class="trend${Number(change) < 0 ? " negative" : ""}">${Number(change) > 0 ? "+" : ""}${Number(change)}%</span><span>vs. mes anterior</span>`
@@ -205,7 +249,7 @@ function monthlySeries(metricName = "ventas") {
 }
 function customerTable(customers) {
   if (!customers.length) return `<div class="empty-state">No encontramos clientes para esta búsqueda.</div>`;
-  return `<div class="table-wrap"><table class="data-table"><thead><tr><th>CLIENTE</th><th>EMAIL</th><th>TARJETA</th><th>ESTADO</th><th>VISITAS</th><th>ÚLTIMA VISITA</th></tr></thead><tbody>${customers.map(customer => `<tr><td class="customer-cell"><span class="customer-avatar">${escapeHtml(customer.iniciales || initials(customer.nombre))}</span>${escapeHtml(customer.nombre)}</td><td>${escapeHtml(customer.correo)}</td><td>${escapeHtml(customer.tarjeta)}</td><td><span class="status-pill${customer.estado === "Inactiva" ? " inactive" : ""}">${escapeHtml(customer.estado)}</span></td><td>${customer.visitas}</td><td>${escapeHtml(customer.ultimaVisita)}</td></tr>`).join("")}</tbody></table></div>`;
+  return `<div class="table-wrap"><table class="data-table"><thead><tr><th>CLIENTE</th><th>EMAIL</th><th>UBICACIÓN</th><th>ESTADO</th><th>VISITAS</th><th>ÚLTIMA VISITA</th></tr></thead><tbody>${customers.map(customer => `<tr><td class="customer-cell"><span class="customer-avatar">${escapeHtml(customer.iniciales || initials(customer.nombre))}</span>${escapeHtml(customer.nombre)}</td><td>${escapeHtml(customer.correo)}</td><td>${escapeHtml(customer.distrito||"Sin zona")}</td><td><span class="status-pill${customer.estado === "Inactiva" ? " inactive" : ""}">${escapeHtml(customer.estado)}</span></td><td>${customer.visitas}</td><td>${escapeHtml(customer.ultimaVisita)}</td></tr>`).join("")}</tbody></table></div>`;
 }
 function chartMarkup() {
   const series = monthlySeries(selectedMetric);
@@ -233,13 +277,13 @@ function render() {
   const renderers=window.fidegresaPageRenderers;
   const renderer=renderers[currentPage];
   if(!renderer) throw new Error(`No se encontró el renderizador de la página "${currentPage}".`);
-  pageContent.innerHTML=renderer({data,pageHeader,kpi,money,customerTable,escapeHtml,initials,icon,chartMarkup,monthlySeries,changeOf,selectedMetric,searchTerm,clientFilter,cardFilter,reviewFilter});
+  pageContent.innerHTML=renderer({data,pageHeader,kpi,money,customerTable,escapeHtml,initials,icon,chartMarkup,monthlySeries,changeOf,selectedMetric,searchTerm,clientFilter,cardFilter,reviewFilter,getReachData});
   document.body.classList.toggle("dark-theme",data.configuracion.tema==="oscuro");
 }
 function refreshLive() {
   const renderer = window.fidegresaPageRenderers[currentPage];
   if (!renderer) throw new Error(`No se encontró el renderizador de la página "${currentPage}".`);
-  const html = renderer({data,pageHeader,kpi,money,customerTable,escapeHtml,initials,icon,chartMarkup,monthlySeries,changeOf,selectedMetric,searchTerm,clientFilter,cardFilter,reviewFilter});
+  const html = renderer({data,pageHeader,kpi,money,customerTable,escapeHtml,initials,icon,chartMarkup,monthlySeries,changeOf,selectedMetric,searchTerm,clientFilter,cardFilter,reviewFilter,getReachData});
   const template = document.createElement("template");
   template.innerHTML = html;
   for (const current of [...pageContent.querySelectorAll("[data-live]")]) {
@@ -458,11 +502,39 @@ function cardDialog(card) {
   }
 }
 function locationDialog() {
-  const form=`<div class="form-grid"><div class="form-field full"><label for="location-name">Nombre del negocio</label><input id="location-name" class="form-control" name="nombre" required maxlength="50" placeholder="Ej. Café de la Plaza"></div><div class="form-field"><label for="location-type">Tipo de negocio</label><select id="location-type" class="form-control" name="categoria"><option>Cafetería</option><option>Restaurante</option><option>Barbería</option><option>Repostería</option><option>Confitería</option><option>Otro</option></select></div><div class="form-field"><label for="location-address">Dirección</label><input id="location-address" class="form-control" name="direccion" required maxlength="100" placeholder="Calle y número"></div><div class="form-field full"><label for="location-hours">Horario de atención</label><input id="location-hours" class="form-control" name="horario" maxlength="60" placeholder="Lun – Sáb · 9:00 – 18:00"></div></div>`;
+  const form=`<div class="form-grid"><div class="form-field full"><label for="location-name">Nombre del negocio</label><input id="location-name" class="form-control" name="nombre" required maxlength="50" placeholder="Ej. Café de la Plaza"></div><div class="form-field"><label for="location-type">Tipo de negocio</label><select id="location-type" class="form-control" name="categoria"><option>Cafetería</option><option>Restaurante</option><option>Barbería</option><option>Repostería</option><option>Confitería</option><option>Otro</option></select></div><div class="form-field"><label for="location-district">Distrito</label><select id="location-district" class="form-control" name="distrito" required>${Object.keys(mapDistricts).map(district=>`<option>${escapeHtml(district)}</option>`).join("")}</select></div><div class="form-field full"><label for="location-address">Dirección o referencia</label><input id="location-address" class="form-control" name="direccion" required maxlength="100" placeholder="Av. o referencia dentro del distrito"></div><div class="form-field full"><label for="location-hours">Horario de atención</label><input id="location-hours" class="form-control" name="horario" maxlength="60" placeholder="Lun – Sáb · 9:00 – 18:00"></div></div>`;
   openModal("Agregar ubicación","Suma un negocio al programa Fidegresa",form,"Agregar ubicación",formData=>{
-    data.ubicaciones.push({id:Date.now(),nombre:String(formData.get("nombre")).trim(),categoria:String(formData.get("categoria")),direccion:String(formData.get("direccion")).trim(),horario:String(formData.get("horario")).trim()||"Horario por definir",clientes:0,activa:true});
+    const distrito=String(formData.get("distrito"));
+    const position=mapPositionFor(distrito);
+    data.ubicaciones.push({id:Date.now(),nombre:String(formData.get("nombre")).trim(),categoria:String(formData.get("categoria")),direccion:`${String(formData.get("direccion")).trim()}, ${distrito}, Lima`,distrito,mapX:position.x,mapY:position.y,horario:String(formData.get("horario")).trim()||"Horario por definir",clientes:0,activa:true});
     saveData();modal.close();render();showToast("Ubicación agregada.");
   });
+}
+function createAudienceDialog() {
+  const {location,inRange}=getReachData();
+  const audienceRows=inRange.length
+    ? inRange.map(person=>`<li><span class="customer-avatar">${escapeHtml(person.iniciales||initials(person.nombre))}</span><span><strong>${escapeHtml(person.nombre)}</strong><small>${escapeHtml(person.distrito)} · ${person.distance} m</small></span></li>`).join("")
+    : `<li class="audience-empty">Aún no hay clientes en este radio. Amplía el alcance para crear una audiencia.</li>`;
+  const content=`<div class="audience-count"><span>Personas que recibirían el aviso</span><strong>${inRange.length}</strong></div><ul class="audience-recipient-list">${audienceRows}</ul><div class="form-field audience-message-field"><label for="audience-message">Mensaje de notificación</label><textarea id="audience-message" class="form-control" name="mensaje" required maxlength="240" rows="3" placeholder="Escribe una invitación breve para tus clientes…"></textarea><small class="field-hint">Hasta 240 caracteres.</small></div><p class="audience-demo-note">Demostración local: el envío se registrará aquí, pero no llegará como notificación real a los dispositivos.</p>`;
+  openModal("Crear audiencia",`${escapeHtml(location?.nombre||"Tu local")} · ${data.geolocalizacion.radio} m · ${escapeHtml(location?.distrito||"Lima")}`,content,"Enviar notificación",formData=>{
+    const message=String(formData.get("mensaje")||"").trim();
+    if(!inRange.length){
+      showToast("Amplía el radio para incluir clientes antes de enviar.",true);
+      return;
+    }
+    if(!message){
+      showToast("Escribe un mensaje para la audiencia.",true);
+      return;
+    }
+    data.audiencias.unshift({id:Date.now(),ubicacion:location.nombre,distrito:location.distrito,radio:Number(data.geolocalizacion.radio),clientes:inRange.map(person=>person.id),mensaje:message,fecha:new Date().toISOString()});
+    if(!saveData()){
+      data.audiencias.shift();
+      return;
+    }
+    modal.close();
+    showToast(`Notificación de demostración registrada para ${inRange.length} ${inRange.length===1?"cliente":"clientes"}.`);
+  },true);
+  modalForm.querySelector('[data-action="submit-modal"]').disabled=!inRange.length;
 }
 function profileDialog() {
   const profile=data.configuracion;
@@ -473,7 +545,7 @@ function profileDialog() {
   });
 }
 function exportClients() {
-  const rows=[["Nombre","Correo","Tarjeta","Estado","Visitas","Última visita"],...data.clientes.map(person=>[person.nombre,person.correo,person.tarjeta,person.estado,person.visitas,person.ultimaVisita])];
+  const rows=[["Nombre","Correo","Ubicación","Estado","Visitas","Última visita"],...data.clientes.map(person=>[person.nombre,person.correo,person.distrito||"Sin zona",person.estado,person.visitas,person.ultimaVisita])];
   const csv="\uFEFF"+rows.map(row=>row.map(value=>`"${String(value).replaceAll('"','""')}"`).join(",")).join("\r\n");
   const url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
   const link=document.createElement("a");link.href=url;link.download="clientes-fidegresa.csv";link.click();URL.revokeObjectURL(url);
@@ -500,6 +572,7 @@ function loadSavedData() {
     console.error("Los datos guardados del panel no se pudieron leer.",error);
     showToast("No fue posible leer los datos guardados.",true);
   }
+  ensureMapData();
 }
 const actions = {
   menu: () => document.querySelector("#sidebar").classList.toggle("open"),
@@ -564,7 +637,18 @@ const actions = {
   "close-modal": () => modal.close(),
   "submit-modal": button => button.form?.requestSubmit(),
   "export-clients": () => exportClients(),
-  "center-map": () => showToast("Mapa centrado en "+(data.ubicaciones.find(place=>place.id===Number(data.geolocalizacion.ubicacionId))?.nombre||"la ubicación seleccionada")+".")
+  "create-audience": () => createAudienceDialog(),
+  "center-map": () => {
+    const {location}=getReachData();
+    if(!location) return;
+    const position=mapPositionFor(location.distrito);
+    location.mapX=position.x;
+    location.mapY=position.y;
+    saveData();
+    syncGeoMap();
+    refreshLive();
+    showToast(`Mapa centrado en ${location.nombre}.`);
+  }
 };
 document.addEventListener("click",event=>{
   const legalLink=event.target.closest("[data-legal-screen]");
@@ -599,6 +683,62 @@ document.addEventListener("click",event=>{
   if(!action){console.error(`No existe la acción "${button.dataset.action}".`);return;}
   if(button.dataset.action==="submit-modal") event.preventDefault();
   action(button);
+});
+function syncGeoMap() {
+  const {location}=getReachData();
+  const marker=pageContent.querySelector("[data-map-marker]");
+  const circle=pageContent.querySelector("#geo-range-circle");
+  if(!location||!marker||!circle) return;
+  marker.setAttribute("transform",`translate(${location.mapX} ${location.mapY})`);
+  circle.setAttribute("cx",String(location.mapX));
+  circle.setAttribute("cy",String(location.mapY));
+  circle.setAttribute("r",String(Number(data.geolocalizacion.radio)/mapMetersPerUnit));
+}
+function updateDraggedMapMarker(event) {
+  if(!activeMapDrag) return;
+  const matrix=activeMapDrag.svg.getScreenCTM();
+  if(!matrix) return;
+  const point=new DOMPoint(event.clientX,event.clientY).matrixTransform(matrix.inverse());
+  const {location}=getReachData();
+  if(!location) return;
+  location.mapX=Math.max(45,Math.min(955,Math.round(point.x)));
+  location.mapY=Math.max(45,Math.min(655,Math.round(point.y)));
+  syncGeoMap();
+  refreshLive();
+}
+document.addEventListener("pointerdown",event=>{
+  const marker=event.target.closest("[data-map-marker]");
+  if(!marker) return;
+  const svg=marker.ownerSVGElement;
+  if(!svg) return;
+  event.preventDefault();
+  svg.setPointerCapture(event.pointerId);
+  activeMapDrag={svg,pointerId:event.pointerId};
+  svg.classList.add("is-dragging");
+});
+document.addEventListener("pointermove",event=>{
+  if(activeMapDrag?.pointerId===event.pointerId) updateDraggedMapMarker(event);
+});
+const finishMapDrag=event=>{
+  if(activeMapDrag?.pointerId!==event.pointerId) return;
+  activeMapDrag.svg.classList.remove("is-dragging");
+  activeMapDrag=null;
+  saveData();
+};
+document.addEventListener("pointerup",finishMapDrag);
+document.addEventListener("pointercancel",finishMapDrag);
+document.addEventListener("keydown",event=>{
+  const marker=event.target.closest("[data-map-marker]");
+  const delta={ArrowLeft:[-12,0],ArrowRight:[12,0],ArrowUp:[0,-12],ArrowDown:[0,12]}[event.key];
+  if(!marker||!delta) return;
+  event.preventDefault();
+  const {location}=getReachData();
+  if(!location) return;
+  location.mapX=Math.max(45,Math.min(955,location.mapX+delta[0]));
+  location.mapY=Math.max(45,Math.min(655,location.mapY+delta[1]));
+  saveData();
+  syncGeoMap();
+  refreshLive();
 });
 document.querySelector("#login-form").addEventListener("submit",event=>{
   event.preventDefault();
@@ -637,7 +777,7 @@ document.querySelector("#register-form").addEventListener("submit",event=>{
 });
 document.addEventListener("input",event=>{
   if(event.target.id==="client-search"){searchTerm=event.target.value;refreshLive();}
-  if(event.target.id==="radius-input"){data.geolocalizacion.radio=Number(event.target.value);document.querySelector("#radius-value").textContent=`${event.target.value} m`;saveData();refreshLive();}
+  if(event.target.id==="radius-input"){data.geolocalizacion.radio=Number(event.target.value);document.querySelector("#radius-value").textContent=`${event.target.value} m`;saveData();syncGeoMap();refreshLive();}
 });
 document.addEventListener("change",event=>{
   if(event.target.id==="client-filter"){clientFilter=event.target.value;refreshLive();}

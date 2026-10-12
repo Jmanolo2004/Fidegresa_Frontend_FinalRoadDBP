@@ -27,3 +27,12 @@ y gift cards, personalizando el estilo, los colores, la imagen y los elementos
 visibles con una vista previa. Las imágenes seleccionadas se guardan únicamente
 en el almacenamiento local del navegador (límite de 500 KB); el código gráfico
 de las tarjetas es ilustrativo y no se puede escanear.
+
+La vista Geolocalización muestra un mapa vectorial local inspirado en la
+cartografía digital, con ubicaciones de demostración en Barranco, Miraflores,
+San Isidro, San Borja y Surco. Puedes mover el pin y ajustar el radio para
+calcular qué clientes de ejemplo quedan dentro del alcance. «Crear Audiencia»
+permite revisar los destinatarios y registrar un mensaje de demostración en el
+almacenamiento local; no consulta Google Maps, GPS ni envía notificaciones
+reales. En Clientes, la columna «Ubicación» muestra el distrito de cada perfil
+de ejemplo.

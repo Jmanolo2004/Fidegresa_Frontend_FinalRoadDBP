@@ -1,7 +1,7 @@
 window.fidegresaPageRenderers ??= {};
 window.fidegresaPageRenderers.clientes = ({data,pageHeader,kpi,customerTable,escapeHtml,searchTerm,clientFilter,icon}) => {
   const results = data.clientes.filter(person => {
-    const matchesTerm = `${person.nombre} ${person.correo} ${person.tarjeta}`.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesTerm = `${person.nombre} ${person.correo} ${person.distrito||""}`.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesTerm && (clientFilter === "Todos" || person.estado === clientFilter);
   });
   const totalVisits=data.clientes.reduce((total,person)=>total+Number(person.visitas||0),0);
