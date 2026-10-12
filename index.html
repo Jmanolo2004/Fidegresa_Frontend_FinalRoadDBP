@@ -375,8 +375,15 @@
             <label for="business-category">Tipo de negocio</label>
             <select id="business-category" name="category" required>
               <option value="" disabled selected>Selecciona una categoría</option>
-              <option>Cafetería</option><option>Restaurante</option><option>Repostería</option><option>Barbería</option><option>Otro</option>
+              <option>Cafetería</option><option>Restaurante</option><option>Repostería</option><option>Barbería</option><option>Confitería</option><option>Otro</option>
             </select>
+            <label for="business-district">Distrito del local</label>
+            <select id="business-district" name="district" required>
+              <option value="" disabled selected>Selecciona tu distrito</option>
+              <option>Barranco</option><option>Miraflores</option><option>San Isidro</option><option>San Borja</option><option>Santiago de Surco</option>
+            </select>
+            <label for="business-address">Dirección o referencia <span class="optional-label">(opcional)</span></label>
+            <input id="business-address" name="address" autocomplete="street-address" placeholder="Ej. Av. José Larco 812" maxlength="100" />
             <div class="form-pair">
               <div><label for="owner-first-name">Nombre del dueño</label><input id="owner-first-name" name="firstName" autocomplete="given-name" placeholder="Nombre" required maxlength="50" /></div>
               <div><label for="owner-last-name">Apellido del dueño</label><input id="owner-last-name" name="lastName" autocomplete="family-name" placeholder="Apellido" required maxlength="50" /></div>

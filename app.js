@@ -1056,23 +1056,48 @@ document.querySelector("#register-form").addEventListener("submit",event=>{
   const firstName=String(formData.get("firstName")).trim();
   const lastName=String(formData.get("lastName")).trim();
   const email=String(formData.get("email")).trim();
+  const category=String(formData.get("category")||"");
+  const district=String(formData.get("district")||"");
+  const address=String(formData.get("address")||"").trim();
   const password=String(formData.get("password"));
-  if(!business||!firstName||!lastName||!email||password.length<8) return;
+  if(!business||!firstName||!lastName||!email||!category||!Object.hasOwn(mapDistricts,district)||password.length<8){
+    showToast("Revisa los datos del formulario antes de continuar.",true);
+    return;
+  }
+  const previous=data;
+  data={
+    ...data,
+    configuracion:{...data.configuracion},
+    geolocalizacion:{radio:500,...data.geolocalizacion},
+    ubicaciones:[...data.ubicaciones]
+  };
   data.configuracion.marca=business;
   data.configuracion.perfilNombre=`${firstName} ${lastName}`;
   data.configuracion.perfilCorreo=email;
-  if(!data.ubicaciones.some(place=>place.nombre.toLowerCase()===business.toLowerCase())){
-    data.ubicaciones.unshift({
-      id:Date.now(),
+  let location=data.ubicaciones.find(place=>place.nombre.trim().toLocaleLowerCase(locale)===business.toLocaleLowerCase(locale));
+  if(!location){
+    const position=mapPositionFor(district);
+    location={
+      id:Math.max(0,...data.ubicaciones.map(place=>Number(place.id)||0))+1,
       nombre:business,
-      categoria:String(formData.get("category")),
-      direccion:"Dirección pendiente",
+      categoria:category,
+      direccion:address||"Dirección pendiente",
+      distrito:district,
+      mapX:position.x,
+      mapY:position.y,
+      latitud:position.latitud,
+      longitud:position.longitud,
       horario:"Horario por definir",
       clientes:0,
       activa:true
-    });
+    };
+    data.ubicaciones.unshift(location);
   }
-  saveData();
+  data.geolocalizacion.ubicacionId=location.id;
+  if(!saveData()){
+    data=previous;
+    return;
+  }
   event.currentTarget.reset();
   render();
   startDemoSession(email);

@@ -467,6 +467,7 @@ body.dark-theme {
 .auth-intro { margin: 9px 0 26px; color: var(--muted); font-size: 13px; line-height: 1.55; }
 .auth-form { display: grid; gap: 9px; }
 .auth-form label { margin-top: 5px; color: var(--text); font-size: 11px; font-weight: 650; }
+.optional-label { color: var(--muted); font-size: 9px; font-weight: 400; }
 .auth-form input, .auth-form select { width: 100%; min-height: 45px; padding: 0 12px; border: 1px solid var(--line); border-radius: 8px; outline: none; background: var(--surface); color: var(--text); font-size: 12px; }
 .auth-form input:focus, .auth-form select:focus { border-color: var(--caramel); box-shadow: 0 0 0 3px rgb(200 137 79 / 14%); }
 .auth-primary { display: inline-flex; min-height: 46px; align-items: center; justify-content: center; margin-top: 11px; padding: 0 18px; border: 0; border-radius: 8px; background: var(--brown); color: white; font-size: 12px; font-weight: 700; transition: background .16s, transform .16s; }
