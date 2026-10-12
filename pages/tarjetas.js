@@ -35,11 +35,15 @@ window.fidegresaPageRenderers.tarjetas = ({data,pageHeader,kpi,escapeHtml,cardFi
     </article>`;
   };
   const typeOptions=["Todas",...typeLabels].map(type=>`<option value="${type}"${cardFilter===type?" selected":""}>${type==="Giftcard"?"Gift cards":type}</option>`).join("");
-  const cardsMarkup=cards.length?`<div class="cards-grid">${cards.map(card=>`<article class="program-card">
-    ${previewCard(card)}
-    <div class="program-card-meta"><span class="program-status"><i></i>${escapeHtml(card.estado||"Activa")}</span><span>${Number(card.clientes)||0} clientes</span><span>${escapeHtml(card.negocio||"Sin local")}</span></div>
-    <div class="program-card-actions"><button class="small-action" data-action="edit-card" data-id="${Number(card.id)}">${icon("settings",14)}Diseñar</button><button class="small-action danger-text" data-action="delete-card" data-id="${Number(card.id)}">${icon("close",14)}Eliminar</button></div>
-  </article>`).join("")}</div>`:`<div class="empty-state">No hay programas en esta categoría. Crea uno para comenzar.</div>`;
+  const cardsMarkup=cards.length?`<div class="cards-grid">${cards.map(card=>{
+    const location=data.ubicaciones.find(place=>place.nombre===card.negocio);
+    const isActive=location?location.activa:card.estado!=="En pausa";
+    return `<article class="program-card">
+      ${previewCard(card)}
+      <div class="program-card-meta"><span class="program-status${isActive?"":" paused"}"><i></i>${isActive?"Activa":"En pausa"}</span><span>${Number(card.clientes)||0} clientes</span><span>${escapeHtml(card.negocio||"Sin local")}</span></div>
+      <div class="program-card-actions"><button class="small-action" data-action="edit-card" data-id="${Number(card.id)}">${icon("settings",14)}Diseñar</button><button class="small-action danger-text" data-action="delete-card" data-id="${Number(card.id)}">${icon("close",14)}Eliminar</button></div>
+    </article>`;
+  }).join("")}</div>`:`<div class="empty-state">No hay programas en esta categoría. Crea uno para comenzar.</div>`;
   return `${pageHeader("Tarjetas","Diseña programas de lealtad con la identidad y los beneficios de tu negocio.",`<button class="primary-button" data-action="new-card">${icon("card",16)}Crear programa</button>`)}
     <div class="stats-grid card-program-stats">
       ${kpi("Programas creados",data.tarjetas.length,null,"Tarjetas de lealtad listas para tus clientes.","card")}
