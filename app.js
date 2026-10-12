@@ -25,12 +25,14 @@ let selectedPeriod = "month";
 let toastTimer;
 let activeMapDrag = null;
 const mapMetersPerUnit = 2.5;
+const districtNames = ["Barranco","Miraflores","San Isidro","San Borja","Santiago de Surco"];
 const mapDistricts = {
-  Barranco:{x:300,y:555},
-  Miraflores:{x:410,y:325},
-  "San Isidro":{x:625,y:245},
-  "San Borja":{x:585,y:455},
-  Surco:{x:735,y:535}
+  Barranco:{x:300,y:555,latitud:-12.1451,longitud:-77.0218},
+  Miraflores:{x:410,y:325,latitud:-12.1225,longitud:-77.0298},
+  "San Isidro":{x:625,y:245,latitud:-12.0975,longitud:-77.0365},
+  "San Borja":{x:585,y:455,latitud:-12.1014,longitud:-76.9993},
+  "Santiago de Surco":{x:735,y:535,latitud:-12.1096,longitud:-76.9922},
+  Surco:{x:735,y:535,latitud:-12.1096,longitud:-76.9922}
 };
 
 const pageContent = document.querySelector("#page-content");
@@ -161,15 +163,17 @@ function mapPositionFor(district) {
 function ensureMapData() {
   if(!Array.isArray(data.audiencias)) data.audiencias=[];
   data.ubicaciones.forEach((place,index)=>{
-    const district=Object.hasOwn(mapDistricts,place.distrito)?place.distrito:Object.keys(mapDistricts)[index%Object.keys(mapDistricts).length];
+    const district=place.distrito==="Surco"?"Santiago de Surco":Object.hasOwn(mapDistricts,place.distrito)?place.distrito:districtNames[index%districtNames.length];
     place.distrito=district;
     const position=mapPositionFor(district);
     if(!Number.isFinite(Number(place.mapX))) place.mapX=position.x;
     if(!Number.isFinite(Number(place.mapY))) place.mapY=position.y;
+    if(!Number.isFinite(Number(place.latitud))) place.latitud=position.latitud;
+    if(!Number.isFinite(Number(place.longitud))) place.longitud=position.longitud;
   });
   data.clientes.forEach((person,index)=>{
     const associatedLocation=data.ubicaciones.find(place=>place.nombre===person.tarjeta)||data.ubicaciones[index%Math.max(1,data.ubicaciones.length)];
-    const district=Object.hasOwn(mapDistricts,person.distrito)?person.distrito:associatedLocation?.distrito||Object.keys(mapDistricts)[index%Object.keys(mapDistricts).length];
+    const district=person.distrito==="Surco"?"Santiago de Surco":Object.hasOwn(mapDistricts,person.distrito)?person.distrito:associatedLocation?.distrito||districtNames[index%districtNames.length];
     person.distrito=district;
     if(!Number.isFinite(Number(person.mapX))||!Number.isFinite(Number(person.mapY))){
       const center=mapPositionFor(district);
@@ -613,13 +617,55 @@ function cardDialog(card) {
     preview.innerHTML=cardPreviewMarkup(previewData,icon);
   }
 }
-function locationDialog() {
-  const form=`<div class="form-grid"><div class="form-field full"><label for="location-name">Nombre del negocio</label><input id="location-name" class="form-control" name="nombre" required maxlength="50" placeholder="Ej. Café de la Plaza"></div><div class="form-field"><label for="location-type">Tipo de negocio</label><select id="location-type" class="form-control" name="categoria"><option>Cafetería</option><option>Restaurante</option><option>Barbería</option><option>Repostería</option><option>Confitería</option><option>Otro</option></select></div><div class="form-field"><label for="location-district">Distrito</label><select id="location-district" class="form-control" name="distrito" required>${Object.keys(mapDistricts).map(district=>`<option>${escapeHtml(district)}</option>`).join("")}</select></div><div class="form-field full"><label for="location-address">Dirección o referencia</label><input id="location-address" class="form-control" name="direccion" required maxlength="100" placeholder="Av. o referencia dentro del distrito"></div><div class="form-field full"><label for="location-hours">Horario de atención</label><input id="location-hours" class="form-control" name="horario" maxlength="60" placeholder="Lun – Sáb · 9:00 – 18:00"></div></div>`;
-  openModal("Agregar ubicación","Suma un negocio al programa Fidegresa",form,"Agregar ubicación",formData=>{
+function locationDialog(location=null) {
+  const editing=Boolean(location);
+  const categories=["Cafetería","Restaurante","Barbería","Repostería","Confitería","Otro"];
+  if(location?.categoria&&!categories.includes(location.categoria))categories.push(location.categoria);
+  const categoryOptions=categories.map(category=>`<option value="${escapeHtml(category)}"${location?.categoria===category?" selected":""}>${escapeHtml(category)}</option>`).join("");
+  const districtOptions=districtNames.map(district=>`<option value="${escapeHtml(district)}"${location?.distrito===district?" selected":""}>${escapeHtml(district)}</option>`).join("");
+  const form=`<div class="form-grid"><div class="form-field full"><label for="location-name">Nombre del negocio</label><input id="location-name" class="form-control" name="nombre" required maxlength="50" value="${escapeHtml(location?.nombre||"")}" placeholder="Ej. Café de la Plaza"></div><div class="form-field"><label for="location-type">Tipo de negocio</label><select id="location-type" class="form-control" name="categoria" required>${categoryOptions}</select></div><div class="form-field"><label for="location-district">Distrito</label><select id="location-district" class="form-control" name="distrito" required>${districtOptions}</select></div><div class="form-field full"><label for="location-address">Dirección o referencia</label><input id="location-address" class="form-control" name="direccion" required maxlength="100" value="${escapeHtml(location?.direccion||"")}" placeholder="Av. o referencia dentro del distrito"></div><div class="form-field full"><label for="location-hours">Horario de atención</label><input id="location-hours" class="form-control" name="horario" maxlength="60" value="${escapeHtml(location?.horario||"")}" placeholder="Lun – Sáb · 9:00 – 18:00"></div></div>`;
+  openModal(editing?"Editar ubicación":"Agregar ubicación",editing?"Actualiza los datos visibles de este local.":"Suma un negocio al programa Fidegresa.",form,editing?"Guardar cambios":"Agregar ubicación",formData=>{
+    const nombre=String(formData.get("nombre")||"").trim();
+    const duplicate=data.ubicaciones.some(place=>Number(place.id)!==Number(location?.id)&&place.nombre.trim().toLocaleLowerCase(locale)===nombre.toLocaleLowerCase(locale));
+    if(duplicate){
+      showToast("Ya existe un local con ese nombre. Elige uno distinto.",true);
+      return;
+    }
+    if(!nombre){
+      showToast("Escribe el nombre del local.",true);
+      return;
+    }
     const distrito=String(formData.get("distrito"));
     const position=mapPositionFor(distrito);
-    data.ubicaciones.push({id:Date.now(),nombre:String(formData.get("nombre")).trim(),categoria:String(formData.get("categoria")),direccion:`${String(formData.get("direccion")).trim()}, ${distrito}, Lima`,distrito,mapX:position.x,mapY:position.y,horario:String(formData.get("horario")).trim()||"Horario por definir",clientes:0,activa:true});
-    saveData();modal.close();render();showToast("Ubicación agregada.");
+    const geo=mapDistricts[distrito];
+    const updated={
+      ...location,
+      id:location?.id??Math.max(0,...data.ubicaciones.map(place=>Number(place.id)||0))+1,
+      nombre,
+      categoria:String(formData.get("categoria")),
+      direccion:String(formData.get("direccion")||"").trim(),
+      distrito,
+      mapX:position.x,
+      mapY:position.y,
+      latitud:geo.latitud,
+      longitud:geo.longitud,
+      horario:String(formData.get("horario")||"").trim()||"Horario por definir",
+      clientes:location?.clientes||0,
+      activa:location?.activa??true
+    };
+    const previous={ubicaciones:data.ubicaciones,tarjetas:data.tarjetas,clientes:data.clientes};
+    data.ubicaciones=editing?data.ubicaciones.map(place=>place.id===location.id?updated:place):[...data.ubicaciones,updated];
+    if(editing&&location.nombre!==nombre){
+      data.tarjetas=data.tarjetas.map(card=>card.negocio===location.nombre?{...card,negocio:nombre}:card);
+      data.clientes=data.clientes.map(customer=>Number(customer.localId)===Number(location.id)||customer.tarjeta===location.nombre?{...customer,tarjeta:nombre}:customer);
+    }
+    if(!saveData()){
+      Object.assign(data,previous);
+      return;
+    }
+    modal.close();
+    render();
+    showToast(editing?"Ubicación actualizada.":"Ubicación agregada.");
   });
 }
 function createAudienceDialog() {
@@ -762,9 +808,23 @@ const actions = {
     });
   },
   "new-location": () => locationDialog(),
+  "edit-location": button => {
+    const place=data.ubicaciones.find(item=>Number(item.id)===Number(button.dataset.id));
+    if(place)locationDialog(place);
+    else showToast("No encontramos esta ubicación. Actualiza la vista e inténtalo de nuevo.",true);
+  },
   "toggle-location": button => {
     const place=data.ubicaciones.find(item=>item.id===Number(button.dataset.id));
-    if(place){place.activa=!place.activa;saveData();render();showToast(`${place.nombre}: ${place.activa?"local activado":"local pausado"}.`);}
+    if(place){
+      const previous=place.activa;
+      place.activa=!previous;
+      if(!saveData()){
+        place.activa=previous;
+        return;
+      }
+      render();
+      showToast(`${place.nombre}: ${place.activa?"local activado":"local pausado"}.`);
+    }
   },
   profile: () => profileDialog(),
   "edit-brand": () => {
