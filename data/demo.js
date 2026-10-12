@@ -39,9 +39,9 @@ window.fidegresaDemoData = (() => {
     const location = locations[Math.floor(index / 6)];
     const count = visitCounts[index];
     const lastDays = lastVisitDays[index];
-    const spacing = Math.max(1,Math.floor((350-lastDays)/count));
+    const spacing = Math.max(1,Math.floor((720-lastDays)/count));
     const visits = Array.from({length:count},(_,visitIndex) => {
-      const daysAgo = Math.min(364,lastDays + (count-visitIndex-1)*spacing);
+      const daysAgo = Math.min(729,lastDays + (count-visitIndex-1)*spacing);
       return {
         id:`${index+1}-${visitIndex+1}`,
         clienteId:index+1,
@@ -68,7 +68,7 @@ window.fidegresaDemoData = (() => {
       longitud:Number((location.longitud + Math.sin(((index*47)%360)*Math.PI/180)*(180+index*14)/(111320*Math.cos(location.latitud*Math.PI/180))).toFixed(6)),
       mapX:Math.max(45,Math.min(955,location.mapX + Math.round(Math.cos(index*1.7)*(70+(index%5)*34)))),
       mapY:Math.max(45,Math.min(655,location.mapY + Math.round(Math.sin(index*1.3)*(55+(index%4)*31)))),
-      fechaRegistro:dateDaysAgo(Math.min(364,lastDays + count*spacing + 10)),
+      fechaRegistro:dateDaysAgo(Math.min(729,lastDays + count*spacing + 10)),
       ultimaVisita:lastVisit.fecha,
       visitas:visits.length,
       estampillas:location.id % 2 ? visits.length % 10 : 0,
@@ -114,9 +114,9 @@ window.fidegresaDemoData = (() => {
     };
   });
   const monthStart = (date,monthOffset=0) => new Date(date.getFullYear(),date.getMonth()+monthOffset,1);
-  const monthlyVisits = Array.from({length:12},(_,index)=>{
-    const start=monthStart(today,index-11);
-    const end=monthStart(today,index-10);
+  const monthlyVisits = Array.from({length:24},(_,index)=>{
+    const start=monthStart(today,index-23);
+    const end=monthStart(today,index-22);
     const records=visits.filter(visit=>new Date(visit.fecha)>=start&&new Date(visit.fecha)<end);
     return {
       fecha:start.toISOString(),

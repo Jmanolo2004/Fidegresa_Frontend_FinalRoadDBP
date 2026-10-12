@@ -20,6 +20,7 @@ let clientFilter = "Todos";
 let cardFilter = "Todas";
 let reviewFilter = "Todas";
 let selectedMetric = "ventas";
+let selectedPeriod = "month";
 let toastTimer;
 let activeMapDrag = null;
 const mapMetersPerUnit = 2.5;
@@ -107,7 +108,17 @@ function initials(name = "") {
   return name.split(/\s+/).filter(Boolean).slice(0,2).map(word => word[0]).join("").toUpperCase();
 }
 function money(value) {
-  return new Intl.NumberFormat(locale,{style:"currency",currency,maximumFractionDigits:0}).format(value);
+  return new Intl.NumberFormat(locale,{style:"currency",currency,maximumFractionDigits:2}).format(value);
+}
+function timeAgo(value) {
+  const days=Math.max(0,Math.floor((Date.now()-new Date(value).getTime())/86400000));
+  if(days===0)return "hoy";
+  if(days===1)return "ayer";
+  if(days<30)return `hace ${days} ${days===1?"día":"días"}`;
+  const months=Math.floor(days/30);
+  if(months<12)return `hace ${months} ${months===1?"mes":"meses"}`;
+  const years=Math.floor(days/365);
+  return `hace ${years} ${years===1?"año":"años"}`;
 }
 function isValidPage(page) {
   return Object.hasOwn(pageTitles, page);
@@ -190,9 +201,9 @@ function distanceBetween(latitudeA,longitudeA,latitudeB,longitudeB) {
   const meters=6371000*2*Math.atan2(Math.sqrt(haversine),Math.sqrt(1-haversine));
   return Math.max(50,Math.round(meters/10)*10);
 }
-function kpi(label, value, change, explanation, iconName = "chart") {
+function kpi(label, value, change, explanation, iconName = "chart", comparisonLabel = "vs. mes anterior") {
   const variation = change !== null && change !== undefined && Number.isFinite(Number(change))
-    ? `<span class="trend${Number(change) < 0 ? " negative" : ""}">${Number(change) > 0 ? "+" : ""}${Number(change)}%</span><span>vs. mes anterior</span>`
+    ? `<span class="trend${Number(change) < 0 ? " negative" : ""}">${Number(change) > 0 ? "+" : ""}${Number(change)}%</span><span>${escapeHtml(comparisonLabel)}</span>`
     : "";
   return `<article class="kpi-card"><div class="kpi-top"><span>${label}</span><span class="kpi-icon">${icon(iconName,18)}</span></div><div class="kpi-value">${value}</div><div class="kpi-foot">${variation}</div><p class="kpi-explanation">${explanation}</p></article>`;
 }
@@ -203,13 +214,90 @@ function changeOf(series) {
   return Number((((current - previous) / previous) * 100).toFixed(1));
 }
 function monthlySeries(metricName = "ventas") {
-  return data.metricas.mensual.map(month=>{
-    const label=new Intl.DateTimeFormat(locale,{month:"short",year:"numeric"}).format(new Date(month.fecha));
+  const {start,end}=periodBounds(selectedPeriod);
+  const buckets=[];
+  if(selectedPeriod==="month"){
+    for(let day=new Date(start);day<end;day.setDate(day.getDate()+1)){
+      const date=new Date(day);
+      buckets.push({
+        start:new Date(date.getFullYear(),date.getMonth(),date.getDate()),
+        end:new Date(date.getFullYear(),date.getMonth(),date.getDate()+1),
+        short:new Intl.DateTimeFormat(locale,{day:"numeric"}).format(date),
+        label:new Intl.DateTimeFormat(locale,{day:"numeric",month:"long"}).format(date)
+      });
+    }
+  }else{
+    for(let month=new Date(start);month<end;month.setMonth(month.getMonth()+1)){
+      const date=new Date(month);
+      buckets.push({
+        start:new Date(date.getFullYear(),date.getMonth(),1),
+        end:new Date(date.getFullYear(),date.getMonth()+1,1),
+        short:new Intl.DateTimeFormat(locale,{month:"short"}).format(date).replace(".",""),
+        label:new Intl.DateTimeFormat(locale,{month:"long",year:"numeric"}).format(date)
+      });
+    }
+  }
+  return buckets.map(bucket=>{
+    const records=data.visitas.filter(visit=>{
+      const date=new Date(visit.fecha);
+      return date>=bucket.start&&date<bucket.end;
+    });
+    const label=bucket.label;
+    const short=bucket.short;
     return {
-      label:label.charAt(0).toLocaleUpperCase(locale)+label.slice(1).replace(".",""),
-      value:metricName==="visitas"?month.visitas:month.ventas
+      ...bucket,
+      label:label.charAt(0).toLocaleUpperCase(locale)+label.slice(1),
+      short:short.charAt(0).toLocaleUpperCase(locale)+short.slice(1),
+      value:records.reduce((total,visit)=>total+(metricName==="visitas"?1:visit.monto),0)
     };
   });
+}
+function periodBounds(period=selectedPeriod,shift=0) {
+  const now=new Date();
+  const duration=period==="year"?now.getMonth()+1:period==="quarter"?3:1;
+  const monthOffset=period==="year"?12*shift:duration*shift;
+  const start=period==="year"
+    ?new Date(now.getFullYear()-shift,0,1)
+    :new Date(now.getFullYear(),now.getMonth()-(period==="quarter"?2:0)-monthOffset,1);
+  const end=new Date(now);
+  if(shift){
+    end.setDate(1);
+    end.setMonth(end.getMonth()-monthOffset);
+    end.setDate(Math.min(now.getDate(),new Date(end.getFullYear(),end.getMonth()+1,0).getDate()));
+  }
+  return {start,end};
+}
+function metricsForPeriod(period=selectedPeriod,shift=0) {
+  const {start,end}=periodBounds(period,shift);
+  const visits=data.visitas.filter(visit=>{
+    const date=new Date(visit.fecha);
+    return date>=start&&date<end;
+  });
+  const frequency=visits.reduce((counts,visit)=>{
+    counts.set(visit.clienteId,(counts.get(visit.clienteId)||0)+1);
+    return counts;
+  },new Map());
+  const uniqueCustomers=new Set(frequency.keys());
+  const returning=[...frequency.values()].filter(count=>count>1).length;
+  const active=new Set(data.clientes.filter(customer=>{
+    const lastVisit=data.visitas
+      .filter(visit=>visit.clienteId===customer.id&&new Date(visit.fecha)<end)
+      .reduce((latest,visit)=>Math.max(latest,new Date(visit.fecha).getTime()),0);
+    return lastVisit&&end.getTime()-lastVisit<=60*86400000;
+  }).map(customer=>customer.id));
+  return {
+    sales:visits.reduce((total,visit)=>total+visit.monto,0),
+    customers:active.size,
+    rewards:data.canjes.filter(item=>{
+      const date=new Date(item.fecha);
+      return date>=start&&date<end;
+    }).length,
+    returnRate:uniqueCustomers.size?returning/uniqueCustomers.size*100:0
+  };
+}
+function percentageChange(current,previous) {
+  if(!previous)return current?100:0;
+  return Number(((current-previous)/previous*100).toFixed(1));
 }
 function customerTable(customers) {
   if (!customers.length) return `<div class="empty-state">No encontramos clientes para esta búsqueda.</div>`;
@@ -218,18 +306,27 @@ function customerTable(customers) {
 function chartMarkup() {
   const series = monthlySeries(selectedMetric);
   const values = series.map(item => item.value);
-  const width = 650, height = 185, left = 34, top = 15, plotWidth = 595, plotHeight = 137;
-  const maxValue = Math.max(...values) * 1.15;
-  const points = values.map((value,index) => `${left + index * plotWidth / 11},${top + plotHeight - (value / maxValue) * plotHeight}`).join(" ");
-  const areaPath = `M ${left},${top + plotHeight} L ${points.replaceAll(" ", " L ")} L ${left + plotWidth},${top + plotHeight} Z`;
+  const width = 650, height = 185, left = 58, top = 15, plotWidth = 569, plotHeight = 137;
+  const maxValue = Math.max(1,...values);
+  const step=selectedMetric==="ventas"
+    ?(selectedPeriod==="month"?(maxValue>500?250:50):maxValue>20000?10000:maxValue>5000?2500:1000)
+    :Math.max(5,Math.ceil(maxValue/4/5)*5);
+  const axisMaximum=Math.max(step*4,Math.ceil(maxValue/(step*4))*step*4);
+  const xFor=index=>left+(series.length===1?plotWidth/2:index*plotWidth/(series.length-1));
+  const yFor=value=>top+plotHeight-(value/axisMaximum)*plotHeight;
+  const points = values.map((value,index) => `${xFor(index)},${yFor(value)}`).join(" ");
+  const areaPath = values.length>1?`M ${left},${top + plotHeight} L ${points.replaceAll(" ", " L ")} L ${left + plotWidth},${top + plotHeight} Z`:"";
   const formatValue = value => selectedMetric === "ventas" ? money(value) : new Intl.NumberFormat(locale).format(value);
-  const topLabel = selectedMetric === "ventas" ? money(maxValue) : new Intl.NumberFormat(locale).format(maxValue);
   const pointsHtml = values.map((value,index) => {
-    const x = left + index * plotWidth / 11;
-    const y = top + plotHeight - (value / maxValue) * plotHeight;
-    return `<circle class="chart-dot" cx="${x}" cy="${y}" r="3"><title>${escapeHtml(series[index].label)} · ${formatValue(value)}</title></circle>`;
+    const x=xFor(index);
+    const y=yFor(value);
+    const tooltip=`${series[index].label} · ${formatValue(value)}`;
+    return `<circle class="chart-dot" cx="${x}" cy="${y}" r="4" tabindex="0" data-chart-tooltip="${escapeHtml(tooltip)}" aria-label="${escapeHtml(tooltip)}"><title>${escapeHtml(tooltip)}</title></circle>`;
   }).join("");
-  return `<div class="chart-wrap" data-live="chart"><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${selectedMetric === "ventas" ? "Gráfico de ventas en soles" : "Gráfico de visitas"} por mes" preserveAspectRatio="none"><defs><linearGradient id="chart-fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ad8059" stop-opacity=".25"/><stop offset="1" stop-color="#ad8059" stop-opacity=".01"/></linearGradient></defs>${[0,1,2,3].map(index => `<line class="chart-grid" x1="${left}" y1="${top + index * plotHeight / 3}" x2="${left + plotWidth}" y2="${top + index * plotHeight / 3}"/><text class="chart-label" x="0" y="${top + index * plotHeight / 3 + 3}">${selectedMetric === "ventas" ? money(maxValue * (1-index/3)) : Math.round(maxValue * (1-index/3))}</text>`).join("")}<path class="chart-area" d="${areaPath}"/><polyline class="chart-line" points="${points}"/>${pointsHtml}${series.map((item,index) => `<text class="chart-label" text-anchor="middle" x="${left + index * plotWidth / 11}" y="${height - 5}">${escapeHtml(item.label.split(" ")[0])}</text>`).join("")}</svg><span class="chart-tooltip">${escapeHtml(series.at(-1).label)} · ${formatValue(values.at(-1))}</span></div><details class="chart-data"><summary>Ver datos mensuales</summary><div class="table-wrap"><table class="data-table"><thead><tr><th>MES</th><th>${selectedMetric === "ventas" ? "VENTAS" : "VISITAS"}</th></tr></thead><tbody>${series.map(item=>`<tr><td>${escapeHtml(item.label)}</td><td>${formatValue(item.value)}</td></tr>`).join("")}</tbody></table></div></details>`;
+  const axisLabel=value=>selectedMetric==="ventas"?(value>=1000?`S/ ${value/1000} mil`:money(value)):new Intl.NumberFormat(locale).format(value);
+  const tooltip=series.length?`${series.at(-1).label} · ${formatValue(values.at(-1))}`:"Sin actividad en este periodo";
+  const labelStride=Math.max(1,Math.ceil(series.length/6));
+  return `<div class="chart-wrap" data-live="chart"><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${selectedMetric==="ventas"?"Ventas en soles":"Visitas"} durante ${selectedPeriod==="month"?"este mes":selectedPeriod==="quarter"?"los últimos tres meses":"este año"}" preserveAspectRatio="none"><defs><linearGradient id="chart-fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ad8059" stop-opacity=".25"/><stop offset="1" stop-color="#ad8059" stop-opacity=".01"/></linearGradient></defs>${[0,1,2,3,4].map(index=>{const tick=Math.round(axisMaximum*(1-index/4)/step)*step;return `<line class="chart-grid" x1="${left}" y1="${top+index*plotHeight/4}" x2="${left+plotWidth}" y2="${top+index*plotHeight/4}"/><text class="chart-label" x="0" y="${top+index*plotHeight/4+3}">${axisLabel(tick)}</text>`;}).join("")}<path class="chart-area" d="${areaPath}"/><polyline class="chart-line" points="${points}"/>${pointsHtml}${series.map((item,index)=>(index%labelStride===0||index===series.length-1)?`<text class="chart-label" text-anchor="middle" x="${xFor(index)}" y="${height-5}">${escapeHtml(item.short)}</text>`:"").join("")}</svg><span class="chart-tooltip" aria-live="polite">${escapeHtml(tooltip)}</span></div><details class="chart-data"><summary>Ver datos del gráfico</summary><div class="table-wrap"><table class="data-table"><thead><tr><th>Fecha</th><th>${selectedMetric==="ventas"?"Ventas":"Visitas"}</th></tr></thead><tbody>${series.map(item=>`<tr><td>${escapeHtml(item.label)}</td><td>${formatValue(item.value)}</td></tr>`).join("")}</tbody></table></div></details>`;
 }
 function render() {
   document.querySelector("#breadcrumb-current").textContent=titleFor(currentPage);
@@ -246,13 +343,13 @@ function render() {
   const renderers=window.fidegresaPageRenderers;
   const renderer=renderers[currentPage];
   if(!renderer) throw new Error(`No se encontró el renderizador de la página "${currentPage}".`);
-  pageContent.innerHTML=renderer({data,pageHeader,kpi,money,customerTable,escapeHtml,initials,icon,chartMarkup,monthlySeries,changeOf,selectedMetric,searchTerm,clientFilter,cardFilter,reviewFilter,getReachData});
+  pageContent.innerHTML=renderer({data,pageHeader,kpi,money,customerTable,escapeHtml,initials,icon,chartMarkup,monthlySeries,changeOf,selectedMetric,selectedPeriod,metricsForPeriod,percentageChange,timeAgo,searchTerm,clientFilter,cardFilter,reviewFilter,getReachData});
   document.body.classList.toggle("dark-theme",data.configuracion.tema==="oscuro");
 }
 function refreshLive() {
   const renderer = window.fidegresaPageRenderers[currentPage];
   if (!renderer) throw new Error(`No se encontró el renderizador de la página "${currentPage}".`);
-  const html = renderer({data,pageHeader,kpi,money,customerTable,escapeHtml,initials,icon,chartMarkup,monthlySeries,changeOf,selectedMetric,searchTerm,clientFilter,cardFilter,reviewFilter,getReachData});
+  const html = renderer({data,pageHeader,kpi,money,customerTable,escapeHtml,initials,icon,chartMarkup,monthlySeries,changeOf,selectedMetric,selectedPeriod,metricsForPeriod,percentageChange,timeAgo,searchTerm,clientFilter,cardFilter,reviewFilter,getReachData});
   const template = document.createElement("template");
   template.innerHTML = html;
   for (const current of [...pageContent.querySelectorAll("[data-live]")]) {
@@ -716,6 +813,11 @@ function updateDraggedMapMarker(event) {
   refreshLive();
 }
 document.addEventListener("pointerdown",event=>{
+  const chartPoint=event.target.closest("[data-chart-tooltip]");
+  if(chartPoint){
+    const tooltip=chartPoint.closest(".chart-wrap")?.querySelector(".chart-tooltip");
+    if(tooltip)tooltip.textContent=chartPoint.dataset.chartTooltip;
+  }
   const marker=event.target.closest("[data-map-marker]");
   if(!marker) return;
   const svg=marker.ownerSVGElement;
@@ -724,6 +826,11 @@ document.addEventListener("pointerdown",event=>{
   svg.setPointerCapture(event.pointerId);
   activeMapDrag={svg,pointerId:event.pointerId};
   svg.classList.add("is-dragging");
+});
+document.addEventListener("pointerover",event=>{
+  const chartPoint=event.target.closest("[data-chart-tooltip]");
+  const tooltip=chartPoint?.closest(".chart-wrap")?.querySelector(".chart-tooltip");
+  if(tooltip)tooltip.textContent=chartPoint.dataset.chartTooltip;
 });
 document.addEventListener("pointermove",event=>{
   if(activeMapDrag?.pointerId===event.pointerId) updateDraggedMapMarker(event);
@@ -752,6 +859,11 @@ document.addEventListener("keydown",event=>{
   saveData();
   syncGeoMap();
   refreshLive();
+});
+document.addEventListener("focusin",event=>{
+  const chartPoint=event.target.closest("[data-chart-tooltip]");
+  const tooltip=chartPoint?.closest(".chart-wrap")?.querySelector(".chart-tooltip");
+  if(tooltip)tooltip.textContent=chartPoint.dataset.chartTooltip;
 });
 document.querySelector("#login-form").addEventListener("submit",event=>{
   event.preventDefault();
@@ -797,6 +909,7 @@ document.addEventListener("change",event=>{
   if(event.target.id==="card-filter"){cardFilter=event.target.value;refreshLive();}
   if(event.target.id==="review-filter"){reviewFilter=event.target.value;refreshLive();}
   if(event.target.id==="metric-select"){selectedMetric=event.target.value;refreshLive();}
+  if(event.target.id==="period-select"){selectedPeriod=event.target.value;refreshLive();}
   if(event.target.id==="geo-location"){data.geolocalizacion.ubicacionId=Number(event.target.value);saveData();render();}
 });
 window.addEventListener("popstate",()=>{
